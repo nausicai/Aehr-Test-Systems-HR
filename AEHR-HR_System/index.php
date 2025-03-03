@@ -77,12 +77,23 @@ $conn->close();
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
             border-radius: 12px;
             text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
         }
 
         .logo img {
             width: 100%;
             max-width: 300px;
             margin-bottom: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .logo img:hover {
+            transform: scale(1.05);
         }
 
         .login-box h2 {
@@ -116,6 +127,11 @@ $conn->close();
             color: white;
         }
 
+        .tab-btn:hover {
+            background: #f57c00;
+            color: white;
+        }
+
         .form-container {
             display: none;
             animation: fadeIn 0.5s ease;
@@ -145,6 +161,12 @@ $conn->close();
             border-radius: 8px;
             font-size: 14px;
             outline: none;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .input-group input:hover {
+            border-color: #f57c00;
+            box-shadow: 0 0 8px rgba(245, 124, 0, 0.3);
         }
 
         .btn {
@@ -157,41 +179,46 @@ $conn->close();
             font-size: 17px;
             font-weight: bold;
             cursor: pointer;
-            transition: background 0.3s ease;
+            transition: background 0.3s ease, transform 0.3s ease;
         }
 
         .btn:hover {
             background: #d32f2f;
+            transform: translateY(-2px);
         }
 
         .modal {
-    display: none; 
-    align-items: center;
-    justify-content: center;
-    position: fixed;
-    z-index: 20; /* Increase to make sure it appears above everything */
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-}
+            display: none; 
+            align-items: center;
+            justify-content: center;
+            position: fixed;
+            z-index: 20; /* Increase to make sure it appears above everything */
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
 
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            position: relative;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
 
+        .modal-content:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
 
-.modal-content {
-    background-color: white;
-    padding: 30px;
-    border-radius: 12px;
-    width: 90%;
-    max-width: 400px;
-    text-align: center;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    position: relative;
-}
-
-.close-btn {
+        .close-btn {
             position: absolute;
             top: 5px;
             right: 5px;
@@ -200,6 +227,11 @@ $conn->close();
             background: none;
             border: none;
             color: black;
+            transition: color 0.3s ease;
+        }
+
+        .close-btn:hover {
+            color: #f57c00;
         }
 
         .modal-content button {
@@ -209,17 +241,22 @@ $conn->close();
             border: none;
             cursor: pointer;
             border-radius: 5px;
+            transition: background 0.3s ease, transform 0.3s ease;
         }
 
         .modal-content button:hover {
             background: #d32f2f;
+            transform: translateY(-2px);
         }
 
         #setupModal {
-    z-index: 10; /* Lower than the error modal */
-}
+            z-index: 10; /* Lower than the error modal */
+        }
 
-        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
     </style>
 </head>
 
@@ -311,84 +348,107 @@ $conn->close();
             document.getElementById(`${type}Tab`).classList.add('active');
         }
 
+        // Automatic focus shift on Enter key
+        document.getElementById('empUsername').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('empPassword').focus();
+            }
+        });
 
-    function loginEmployee() {
-    let username = document.getElementById('empUsername').value.trim();
-    let password = document.getElementById('empPassword').value.trim();
+        document.getElementById('empPassword').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                loginEmployee();
+            }
+        });
 
-    if (!username) {
-        showModal("Please enter your account.");
-        return;
-    }
+        document.getElementById('adminUsername').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('adminPassword').focus();
+            }
+        });
 
-    let formData = new FormData();
-    formData.append("empUsername", username);
-    formData.append("empPassword", password);
+        document.getElementById('adminPassword').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                loginAdmin();
+            }
+        });
 
-    fetch("CRUD/employee_login.php", {
-        method: "POST",
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === "setup") {
-            sessionStorage.setItem("employee_no", data.employee_no); // Store in sessionStorage
-            document.getElementById('setupModal').style.display = 'flex';
-            document.getElementById('newUsername').value = username;
-        } else if (data.status === "success") {
-            window.location.href = data.redirect;
-        } else {
-            showModal(data.message);
+        function loginEmployee() {
+            let username = document.getElementById('empUsername').value.trim();
+            let password = document.getElementById('empPassword').value.trim();
+
+            if (!username) {
+                showModal("Please enter your account.");
+                return;
+            }
+
+            let formData = new FormData();
+            formData.append("empUsername", username);
+            formData.append("empPassword", password);
+
+            fetch("CRUD/employee_login.php", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "setup") {
+                    sessionStorage.setItem("employee_no", data.employee_no); // Store in sessionStorage
+                    document.getElementById('setupModal').style.display = 'flex';
+                    document.getElementById('newUsername').value = username;
+                } else if (data.status === "success") {
+                    window.location.href = data.redirect;
+                } else {
+                    showModal(data.message);
+                }
+            })
+            .catch(error => console.error('Fetch Error:', error));
         }
-    })
-    .catch(error => console.error('Fetch Error:', error));
-}
 
+        function setupAccount() {
+            let employeeNo = sessionStorage.getItem("employee_no"); // Retrieve from sessionStorage
+            let newUsername = document.getElementById('newUsername').value.trim();
+            let newPassword = document.getElementById('newPassword').value.trim();
+            let confirmPassword = document.getElementById('confirmPassword').value.trim();
 
+            if (!newUsername || !newPassword || !confirmPassword) {
+                showModal("All fields are required.");
+                return;
+            }
 
-function setupAccount() {
-    let employeeNo = sessionStorage.getItem("employee_no"); // Retrieve from sessionStorage
-    let newUsername = document.getElementById('newUsername').value.trim();
-    let newPassword = document.getElementById('newPassword').value.trim();
-    let confirmPassword = document.getElementById('confirmPassword').value.trim();
+            if (newPassword.length < 6) {
+                showModal("Password must be at least 6 characters long.");
+                return;
+            }
 
-    if (!newUsername || !newPassword || !confirmPassword) {
-        showModal("All fields are required.");
-        return;
-    }
+            if (newPassword !== confirmPassword) {
+                showModal("Passwords do not match.");
+                return;
+            }
 
-    if (newPassword.length < 6) {
-        showModal("Password must be at least 6 characters long.");
-        return;
-    }
+            let formData = new FormData();
+            formData.append("employee_no", employeeNo);
+            formData.append("newUsername", newUsername);
+            formData.append("newPassword", newPassword);
 
-    if (newPassword !== confirmPassword) {
-        showModal("Passwords do not match.");
-        return;
-    }
-
-    let formData = new FormData();
-    formData.append("employee_no", employeeNo);
-    formData.append("newUsername", newUsername);
-    formData.append("newPassword", newPassword);
-
-    fetch("CRUD/setup_account.php", {
-        method: "POST",
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === "success") {
-            window.location.href = data.redirect;
-        } else {
-            showModal(data.message);
+            fetch("CRUD/setup_account.php", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "success") {
+                    window.location.href = data.redirect;
+                } else {
+                    showModal(data.message);
+                }
+            })
+            .catch(error => console.error('Fetch Error:', error));
         }
-    })
-    .catch(error => console.error('Fetch Error:', error));
-}
-
-
-
 
         // Admin Login
         function loginAdmin() {
@@ -440,3 +500,4 @@ function setupAccount() {
         }
     </script>
 </body>
+</html>

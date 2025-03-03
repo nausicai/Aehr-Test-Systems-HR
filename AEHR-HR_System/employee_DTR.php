@@ -1,979 +1,842 @@
-<?php
-session_start();
-include "CRUD/db.php"; // Database connection
-
-if (!isset($_SESSION["employee_no"])) { // Use the correct session variable
-    header("Location: index.php");
-    exit();
-}
-
-$employee_no = $_SESSION["employee_no"]; // Ensure it matches the update query
-
-$sql = "SELECT name FROM employees WHERE employee_no = ?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("s", $employee_no);
-$stmt->execute();
-$stmt->bind_result($employee_name);
-$stmt->fetch();
-$stmt->close();
-$conn->close();
-?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Employee Time Record</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-    
-<style>
-        :root {
-            --primary-color: #f57c00;
-            --secondary-color: #ff6b6b;
-            --background-color: #f4f4f4;
-            --text-color: #333;
-            --table-header-color: #FE5A1D;
-            --button-hover: #d32f2f;
-            --modal-background: rgba(0, 0, 0, 0.5);
-            --modal-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            --transition-speed: 0.3s;
-        }
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>H.R. System - DTR Submission</title>
 
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            min-height: 100vh;
-            overflow-y: auto;
-            color: var(--text-color);
-        }
+    <!-- Custom fonts for this template-->
+    <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
 
-        .dashboard {
-            width: 95%;
-            max-width: 1200px;
-            padding: 20px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-            border-radius: 12px;
-            text-align: center;
-            margin: 20px 0;
-            position: relative;
-            background: linear-gradient(135deg, #ffffff, #f9f9f9);
-            border: 1px solid #ddd;
-        }
+    <!-- Custom styles for this template-->
+    <link href="css/sb-admin-2.min.css" rel="stylesheet">
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            margin-bottom: 20px;
-        }
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap4.min.css">
 
-        .logo {
-            width: 265px;
-        }
-
-        .form-container {
-            text-align: left;
-            margin-top: 20px;
-            max-height: 500px;
-            overflow-y: auto;
-            padding-right: 10px;
-        }
-
-        .form-container h3 {
-            color: var(--text-color);
-            font-size: 18px;
-            font-weight: 500;
-            margin-bottom: 15px;
-        }
-
-        .input-group {
-            margin-bottom: 15px;
-        }
-
-        .input-group label {
-            display: block;
-            font-weight: 500;
-            margin-bottom: 5px;
-            color: #555;
-        }
-
-        .input-group input {
-            width: 98%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 14px;
-            transition: border-color var(--transition-speed);
-        }
-
-        .input-group input:focus {
-            border-color: var(--primary-color);
-            outline: none;
-        }
-
-        .btn {
-            padding: 12px 24px;
-            background: var(--primary-color);
+    <!-- Custom styles for tables -->
+    <style>
+        .table thead th {
+            background-color: #FE5A1D;
             color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all var(--transition-speed) ease;
-            margin-top: 10px;
-            width: 100%;
-            max-width: 200px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
-        .btn:hover {
-            background: var(--button-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
         }
 
-        .btn:active {
-            transform: translateY(0);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        .table tbody tr td {
+            color: #333;
         }
 
-        .btn i {
-            font-size: 18px;
+        .btn-primary {
+            background-color: #FE5A1D;
+            border-color: #FE5A1D;
         }
 
-        #exportButton {
-            background: #4CAF50;
+        .btn-primary:hover {
+            background-color: #db4104;
+            border-color: #db4104;
         }
 
-        #exportButton:hover {
-            background: #45a049;
+        .btn-success {
+            background-color: #28a745;
+            border-color: #28a745;
         }
 
-        .logout-btn {
-            background: #333;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
+        .btn-success:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
         }
 
-        .logout-btn:hover {
-            background: #555;
+        .btn-warning {
+            background-color: #ffc107;
+            border-color: #ffc107;
         }
 
-        .table-container {
-            margin-top: 20px;
-            overflow-x: auto;
+        .btn-warning:hover {
+            background-color: #e0a800;
+            border-color: #d39e00;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-            font-size: 14px;
+        .card {
+            border: 3px solidrgb(0, 0, 0);
         }
 
-        table th, table td {
-            padding: 12px;
-            border: 1px solid #ddd;
-            text-align: center;
-        }
-
-        table th {
-            background-color: var(--table-header-color);
+        .card-header {
+            background-color: rgb(255, 255, 255);
             color: white;
-            font-weight: 600;
-            position: sticky;
-            top: 0;
-            z-index: 1;
         }
 
-        table tr:nth-child(even) {
-            background-color: #f9f9f9;
+        .dataTables_wrapper .dataTables_paginate .paginate_button {
+            color: #FE5A1D !important;
         }
 
-        table tr:hover {
-            background-color: #f1f1f1;
-            transition: background-color var(--transition-speed);
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+            background-color: rgb(0, 0, 0) !important;
+            border-color: rgb(0, 0, 0) !important;
+            color: white !important;
         }
 
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--modal-background);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
+        .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+            background-color: rgb(0, 0, 0) !important;
+            border-color: rgb(0, 0, 0) !important;
+            color: white !important;
         }
 
         .modal-content {
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            text-align: center;
-            box-shadow: var(--modal-shadow);
-            max-width: 90%;
-            overflow-y: auto;
+            border-radius: 10px;
+            border: 2px solid rgb(0, 0, 0);
         }
 
-        .modal-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .cancel-btn {
-            background: #555;
-        }
-
-        .cancel-btn:hover {
-            background: #333;
-        }
-
-        .back-btn {
-    position: absolute;
-    z-index: 1000;
-    top: 15px;
-    left: 15px;
-    background: linear-gradient(135deg, #ff7043, #d84315);
-    color: white;
-    border: none;
-    border-radius: 20px;
-    padding: 12px 24px;
-    font-size: 16px;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-    transition: all 0.3s ease-in-out;
-}
-
-.back-btn i {
-    font-size: 18px;
-}
-
-.back-btn:hover {
-    background: linear-gradient(135deg, #d84315, #ff7043);
-    transform: scale(1.05);
-    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.3);
-}
-
-
-        .form-container table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-
-        .form-container th, .form-container td {
-            padding: 8px;
-            border: 1px solid #ddd;
-            text-align: center;
-        }
-
-        .form-container th {
-            background-color: var(--table-header-color);
+        .modal-header {
+            background-color: #FE5A1D;
             color: white;
-            font-weight: 600;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
         }
 
-        .form-container input[type="number"] {
-            width: 60px;
-            padding: 5px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            text-align: center;
+        .modal-body {
+            overflow-x: auto;
         }
 
-        .form-container input[type="text"] {
-            width: 120px;
-            padding: 5px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            text-align: center;
-        }
-
-        #viewSubmissionModal .modal-content {
-            max-width: 800px;
+        .modal-body table {
             width: 100%;
+            margin-bottom: 0;
+            min-width: 1200px;
         }
 
-        #viewSubmissionModal table {
-            margin-bottom: 20px;
+        .modal-body table th {
+            background-color: #FE5A1D;
+            color: white;
         }
 
-        #viewSubmissionModal .modal-buttons {
-            justify-content: space-between;
+        .modal-body table td {
+            padding: 10px;
         }
 
-        .button-container {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 20px;
+        .modal-footer {
+            border-top: 1px solid #FE5A1D;
         }
 
-        .spinner-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            margin-bottom: 20px;
+        .modal-footer .btn {
+            background-color: #FE5A1D;
+            border-color: #FE5A1D;
+            color: white;
         }
 
-    .input-group {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .spinner-label {
-        font-size: 16px;
-        color: var(--text-color);
-        display: flex;
-        align-items: center;
-        gap: 5px;
-    }
-
-    .styled-select {
-        padding: 8px 12px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        font-size: 14px;
-        background-color: white;
-        cursor: pointer;
-        transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
-    }
-
-    .styled-select:hover {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 8px rgba(245, 124, 0, 0.2);
-    }
-
-    .styled-select:focus {
-        outline: none;
-        border-color: var(--primary-color);
-        box-shadow: 0 0 12px rgba(245, 124, 0, 0.3);
-    }
-    #viewSubmissionModal .modal-content {
-                max-width: 1200px; /* Adjust as needed */
-                width: 90%;
-            }
-            #viewSubmissionModal .modal-content {
-                max-width: 1200px; /* Adjust as needed */
-                width: 90%;
-            }
-
-            /* Enhanced modal design */
-            .modal-content {
-                background: white;
-                padding: 25px;
-                border-radius: 12px;
-                text-align: center;
-                box-shadow: var(--modal-shadow);
-                max-width: 90%;
-                overflow-y: auto;
-                background: linear-gradient(135deg, #ffffff, #f9f9f9);
-                border: 1px solid #ddd;
-            }
-
-            .modal-buttons {
-                display: flex;
-                justify-content: center;
-                gap: 10px;
-                margin-top: 20px;
-            }
-
-            .modal-buttons .btn {
-                background: var(--primary-color);
-                color: white;
-                border: none;
-                border-radius: 8px;
-                font-size: 16px;
-                cursor: pointer;
-                transition: all var(--transition-speed) ease;
-                padding: 12px 24px;
-            }
-
-            .modal-buttons .btn:hover {
-                background: var(--button-hover);
-                transform: translateY(-2px);
-                box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-            }
-
-            .modal-buttons .btn:active {
-                transform: translateY(0);
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            }
-
-            .modal-buttons .cancel-btn {
-                background: #555;
-            }
-
-            .modal-buttons .cancel-btn:hover {
-                background: #333;
-            }
-
-            /* Enhanced modal button styles */
-            .modal-buttons .btn {
-                background: var(--primary-color);
-                color: white;
-                border: none;
-                border-radius: 8px;
-                font-size: 16px;
-                cursor: pointer;
-                transition: all var(--transition-speed) ease;
-                padding: 12px 24px;
-                margin: 5px;
-            }
-
-            .modal-buttons .btn:hover {
-                background: var(--button-hover);
-                transform: translateY(-2px);
-                box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-            }
-
-            .modal-buttons .btn:active {
-                transform: translateY(0);
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            }
-
-            .modal-buttons .btn.cancel-btn {
-                background: #555;
-            }
-
-            .modal-buttons .btn.cancel-btn:hover {
-                background: #333;
-            }
-
-            /* Specific styles for Edit and Resubmit buttons */
-            #editButton {
-                background: #4CAF50; /* Green */
-            }
-
-            #editButton:hover {
-                background: #45a049;
-            }
-
-            #resubmitButton {
-                background: #2196F3; /* Blue */
-            }
-
-            #resubmitButton:hover {
-                background: #1e88e5;
-            }
-
-
-
-</style>
-</head>
-
-
-<body>
-
-    <!-- Back Button -->
-    <button class="back-btn" onclick="window.location.href='employee_dashboard.php'">
-        <i class="fas fa-arrow-left"></i> Back
-    </button>
-
-
-
-    <div class="dashboard">
-        <div class="header">
-            <h1>Employee Time Record</h1>
-            <img src="img/ATS_Logo.png" alt="Company Logo" class="logo">
-        </div>
-        <div class="employee-info" style="display: flex; justify-content: space-between; align-items: center;">
-    <h1 style="color:rgb(231, 84, 16); margin-top: -15px;">
-        <?php echo htmlspecialchars($employee_name); ?>
-    </h1>
-    <h4 style="margin-top: -15px; opacity: 0.6;">
-        This record will automatically reset every
-        <span style="color: rgb(231, 84, 16);">16th and first day</span> of the month
-    </h4> 
-</div>
-        
-        <div class="spinner-container">
-
-    <!-- Month Selection -->
-    <div class="input-group">
-        <label for="month" class="spinner-label"><i class="fas fa-calendar-alt"></i> Months:</label>
-        <select id="month" class="styled-select">
-            <option value="January">January</option>
-            <option value="February">February</option>
-            <option value="March">March</option>
-            <option value="April">April</option>
-            <option value="May">May</option>
-            <option value="June">June</option>
-            <option value="July">July</option>
-            <option value="August">August</option>
-            <option value="September">September</option>
-            <option value="October">October</option>
-            <option value="November">November</option>
-            <option value="December">December</option>
-        </select>
-    </div>
-
-    <!-- Day Selection -->
-    <div class="input-group">
-        <label for="dayFrom" class="spinner-label"><i class="fas fa-calendar-day"></i> Days:</label>
-        <select id="dayFrom" class="styled-select"></select>
-        <span>to</span>
-        <select id="dayTo" class="styled-select"></select>
-    </div>
-
-    <!-- Year Selection -->
-    <div class="input-group">
-        <label for="year" class="spinner-label"><i class="fas fa-calendar"></i> Years:</label>
-        <select id="year" class="styled-select"></select>
-    </div>
-
-    <!-- Shift Selection -->
-    <div class="input-group">
-        <label for="shift" class="spinner-label"><i class="fas fa-clock"></i> Shifts:</label>
-        <select id="shift" class="styled-select">
-            <option value="Shift 1">SHIFT 1 WORKING HOURS (Monday-Friday)</option>
-            <option value="Shift 2">SHIFT 2 WORKING HOURS (Monday-Thursday)</option>
-            <option value="Shift 3">SHIFT 3 WORKING HOURS (Wednesday-Saturday)</option>
-        </select>
-    </div>
-</div>
-
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    // Get current date details
-    const currentDate = new Date();
-    const currentYear = currentDate.getFullYear();
-    const currentMonth = currentDate.getMonth(); // 0 = Jan, 1 = Feb, etc.
-    const currentDay = currentDate.getDate();
-
-    // Auto-select current month
-    const monthSelect = document.getElementById("month");
-    if (monthSelect) {
-        monthSelect.selectedIndex = currentMonth;
-    }
-
-    // Populate years dynamically (from last year up to 2050)
-    const yearSelect = document.getElementById("year");
-    if (yearSelect) {
-        for (let year = currentYear - 1; year <= 2050; year++) {
-            let option = new Option(year, year);
-            if (year === currentYear) option.selected = true;
-            yearSelect.appendChild(option);
+        .modal-footer .btn:hover {
+            background-color: #db4104;
+            border-color: #db4104;
         }
-    }
 
-    // Function to set day range while allowing full selection (1 to last day of the month)
-    function setDayRange() {
-        const dayFromSelect = document.getElementById("dayFrom");
-        const dayToSelect = document.getElementById("dayTo");
-
-        if (!dayFromSelect || !dayToSelect) return;
-
-        // Get last day of the current month
-        const lastDayOfMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-
-        // Determine default start and end days
-        let defaultStartDay = currentDay <= 15 ? 1 : 16;
-        let defaultEndDay = currentDay <= 15 ? 15 : lastDayOfMonth;
-
-        // Clear existing options
-        dayFromSelect.innerHTML = "";
-        dayToSelect.innerHTML = "";
-
-        // Populate "from" and "to" day dropdowns
-        for (let day = 1; day <= lastDayOfMonth; day++) {
-            let fromOption = new Option(day, day);
-            let toOption = new Option(day, day);
-            if (day === defaultStartDay) fromOption.selected = true;
-            if (day === defaultEndDay) toOption.selected = true;
-            dayFromSelect.appendChild(fromOption);
-            dayToSelect.appendChild(toOption);
+        .text-orange {
+            color: #FE5A1D !important;
         }
-    }
-
-    // Set initial day range
-    setDayRange();
-});
-</script>
-
-
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    const submitButton = document.getElementById("submitButton");
-    const confirmSubmitButton = document.getElementById("confirmSubmit");
-    const cancelSubmitButton = document.getElementById("cancelSubmit");
-    const confirmationModal = document.getElementById("confirmationModal");
-    const successModal = document.getElementById("successModal");
-    const modalMessage = document.getElementById("modalMessage");
-    const dtrForm = document.getElementById("dtrForm");
-
-    // Prevent multiple event listeners being added
-    if (!submitButton.dataset.listenerAdded) {
-        submitButton.dataset.listenerAdded = "true";
-
-        // Show confirmation modal when submit button is clicked
-        submitButton.addEventListener("click", function (event) {
-            event.preventDefault(); // Prevent default submission
-            confirmationModal.style.display = "block";
-        });
-
-        // Close confirmation modal when cancel button is clicked
-        cancelSubmitButton.addEventListener("click", function () {
-            confirmationModal.style.display = "none";
-        });
-
-        // Confirm submission and send data via AJAX
-        confirmSubmitButton.addEventListener("click", function () {
-            confirmationModal.style.display = "none"; // Hide confirmation modal
-
-            // Populate hidden inputs before sending data
-            document.getElementById("yearHidden").value = document.getElementById("year").value;
-            document.getElementById("monthHidden").value = document.getElementById("month").value;
-            document.getElementById("dayFromHidden").value = document.getElementById("dayFrom").value;
-            document.getElementById("dayToHidden").value = document.getElementById("dayTo").value;
-            document.getElementById("shiftHidden").value = document.getElementById("shift").value;
-
-            // Prepare form data
-            const formData = new FormData(dtrForm);
-
-            // Send data via fetch API
-            fetch("CRUD/submit_dtr.php", {
-                method: "POST",
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === "success") {
-                    modalMessage.textContent = data.message;
-                    successModal.style.display = "block"; // Show success modal
-                } else {
-                    alert(data.message); // Show error message if needed
-                }
-            })
-            .catch(error => console.error("Error:", error));
-        });
-    }
-});
-
-// Close success modal
-function closeModal() {
-    document.getElementById("successModal").style.display = "none";
-}
-
-
-</script>
-
-
-<form id="dtrForm" method="POST">
-    <div class="form-container">
-        <table id="mainTable">
-            <thead>
-                <tr>
-                    <th rowspan="2">Employee No.</th>
-                    <th rowspan="2">Employee Name</th>
-                    <th rowspan="2">General</th>
-                    <th rowspan="2">Admin</th>
-                    <th rowspan="2">Finance</th>
-                    <th rowspan="2">Design</th>
-                    <th colspan="6">Operations/Customer Service</th>
-                    <th rowspan="2">Warranty</th>
-                    <th rowspan="2">Billable Service</th>
-                    <th rowspan="2">Upgrade</th>
-                    <th rowspan="2">Pre-Sales Support</th>
-                    <th rowspan="2">Special Project</th>
-                    <th rowspan="2" style="color: yellow">Total Hours</th>
-                </tr>
-                <tr>
-                    <th>Board Repair</th>
-                    <th>PM</th>
-                    <th>Technical Support</th>
-                    <th>Maintenance Support</th>
-                    <th>Logistics & Comm.</th>
-                    <th>CDT/Reports/Meetings</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><input type="text" name="employeeNo" value="<?php echo htmlspecialchars($employee_no); ?>" readonly></td>
-                    <td><input type="text" name="employeeName" value="<?php echo htmlspecialchars($employee_name); ?>" readonly></td>
-                    
-                    <td><input type="number" name="general" class="hourInput"></td>
-                    <td><input type="number" name="admin" class="hourInput"></td>
-                    <td><input type="number" name="finance" class="hourInput"></td>
-                    <td><input type="number" name="design" class="hourInput"></td>
-                    <td><input type="number" name="boardRepair" class="hourInput"></td>
-                    <td><input type="number" name="pm" class="hourInput"></td>
-
-                    <td><input type="number" name="technicalSupport" class="hourInput"></td>
-                    <td><input type="number" name="maintenance" class="hourInput"></td>
-                    <td><input type="number" name="logistics" class="hourInput"></td>
-                    <td><input type="number" name="reports" class="hourInput"></td>
-
-                    <td><input type="number" name="warranty" class="hourInput"></td>
-                    <td><input type="number" name="billableService" class="hourInput"></td>
-                    <td><input type="number" name="upgrade" class="hourInput"></td>
-                    <td><input type="number" name="preSales" class="hourInput"></td>
-                    <td><input type="number" name="specialProject" class="hourInput"></td>
-
-                    <td><input type="number" id="totalHours" name="totalHours" readonly></td>
-                </tr>
-            </tbody>
-        </table>
-
-        <script>
-document.addEventListener("DOMContentLoaded", function () {
-    function calculateTotalHours() {
-        let total = 0;
-        document.querySelectorAll("#mainTable .hourInput").forEach(input => {
-            const value = parseFloat(input.value) || 0;
-            total += value;
-        });
-        document.getElementById("totalHours").value = total;
-    }
-
-    document.querySelectorAll("#mainTable .hourInput").forEach(input => {
-        input.addEventListener("input", calculateTotalHours);
-    });
-    
-    calculateTotalHours();
-});
-</script>
-
-        <table>
-            <thead>
-                <tr>
-                    <th>Weekend Support <span style="color: yellow">(Days)</span></th>
-                    <th>Regular Holiday Overtime <span style="color: yellow">(Hours)</span></th>
-                    <th>Special Holiday Overtime <span style="color: yellow">(Hours)</span></th>
-                    <th>Night Differential <span style="color: yellow">(Hours)</span></th>
-                    <th>Salary Deduction <span style="color: yellow">(Hours)</span></th>
-                    <th>VL <span style="color: yellow">(Hours)</span></th>
-                    <th>SL <span style="color: yellow">(Hours)</span></th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><input type="number" name="weekendSupport"></td>
-                    <td><input type="number" name="regularHolidayOvertime"></td>
-                    <td><input type="number" name="specialHolidayOvertime"></td>
-                    <td><input type="number" name="nightDifferential"></td>
-                    <td><input type="number" name="salaryDeduction"></td>
-                    <td><input type="number" name="vlHours"></td>
-                    <td><input type="number" name="slHours"></td>
-                </tr>
-            </tbody>
-        </table>
-
-        <input type="hidden" name="year" id="yearHidden">
-        <input type="hidden" name="month" id="monthHidden">
-        <input type="hidden" name="dayFrom" id="dayFromHidden">
-        <input type="hidden" name="dayTo" id="dayToHidden">
-        <input type="hidden" name="shift" id="shiftHidden">
-    </div>
-
-
-    <div class="customized-button-container">
-        <button type="button" class="customized-btn" id="submitButton">
-            <i class="fas fa-check"></i> Submit
-        </button>
-        <button class="customized-btn" id="exportButton">
-        <i class="fas fa-file-excel"></i> Export to Excel
-    </button>
-</div>  
-    </div>
-</form>
-
-<!-- Modals -->
-<div id="confirmationModal" class="customized-modal">
-    <div class="customized-modal-content">
-        <h2>Confirm Submission</h2>
-        <p>Are you sure you want to submit this information?</p>
-        <div class="customized-modal-buttons">
-            <button id="confirmSubmit" class="customized-btn">Yes, Submit</button>
-            <button id="cancelSubmit" class="customized-btn customized-cancel-btn">Cancel</button>
-        </div>
-    </div>
-</div>
-
-<!-- Success Modal -->
-<div id="successModal" class="modal">
-    <div class="modal-content">
-        <span class="close-btn" onclick="closeModal()">&times;</span>
-        <p id="modalMessage">Record submitted successfully!</p>
-    </div>
-</div>
-
-
-<div id="noDataModal" class="customized-modal">
-    <div class="customized-modal-content">
-        <h2>No Data to Export</h2>
-        <p>You have nothing to export because you haven't submitted anything yet.</p>
-        <div class="customized-modal-buttons">
-            <button id="closeNoDataModal" class="customized-btn">OK</button>
-        </div>
-    </div>
-</div>
-
-<!-- Confirmation Modal for Export -->
-<div id="exportConfirmationModal" class="customized-modal">
-    <div class="customized-modal-content">
-        <h2>Confirm Export</h2>
-        <p>Are you sure you want to export the data to Excel?</p>
-        <div class="customized-modal-buttons">
-            <button id="confirmExport" class="customized-btn">
-                <i class="fas fa-spinner fa-spin" id="exportSpinner"></i> Yes, Export
-            </button>
-            <button id="cancelExport" class="customized-btn customized-cancel-btn">Cancel</button>
-        </div>
-    </div>
-</div>
-
-<!-- Success Modal After Export -->
-<div id="exportSuccessModal" class="customized-modal">
-    <div class="customized-modal-content">
-        <h2>Export Successful</h2>
-        <p>Your data has been successfully exported to Excel!</p>
-        <div class="customized-modal-buttons">
-            <button id="closeExportSuccessModal" class="customized-btn">OK</button>
-        </div>
-    </div>
-</div>
-
-<!-- JavaScript -->
- <script>
-    function showModal(modalId) {
-    document.getElementById(modalId).style.display = "flex";
-}
-
-function hideModal(modalId) {
-    document.getElementById(modalId).style.display = "none";
-}
-
-document.getElementById("exportButton").addEventListener("click", function () {
-    let hasData = false;
-    document.querySelectorAll(".hours-input").forEach(input => {
-        if (input.value.trim() !== "") {
-            hasData = true;
-        }
-    });
-    if (hasData) {
-        showModal("exportConfirmationModal");
-    } else {
-        showModal("noDataModal");
-    }
-});
-
-document.getElementById("confirmExport").addEventListener("click", function () {
-    alert("Exporting to Excel...");
-    hideModal("exportConfirmationModal");
-    showModal("exportSuccessModal");
-});
-
-document.getElementById("cancelExport").addEventListener("click", function () {
-    hideModal("exportConfirmationModal");
-});
-
-document.getElementById("closeNoDataModal").addEventListener("click", function () {
-    hideModal("noDataModal");
-});
-
-document.getElementById("closeExportSuccessModal").addEventListener("click", function () {
-    hideModal("exportSuccessModal");
-});
-
-    </script>
-
-
-<style>
-    /* Modal Styling */
-    .customized-modal {
-        display: none; /* Ensures modal is hidden on load */
-        position: fixed;
-        z-index: 1000;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
-        justify-content: center;
-        align-items: center;
-        transition: opacity 0.3s ease-in-out;
-    }
-
-    .customized-modal-content {
-        background: #fff;
-        padding: 20px;
-        width: 90%;
-        max-width: 400px;
-        border-radius: 10px;
-        box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.3);
-        text-align: center;
-        animation: customized-slideIn 0.3s ease-in-out;
-    }
-
-    @keyframes customized-slideIn {
-        from {
-            transform: translateY(-50px);
-            opacity: 0;
-        }
-        to {
-            transform: translateY(0);
-            opacity: 1;
-        }
-    }
-
-    .customized-modal-buttons {
-        margin-top: 15px;
-        display: flex;
-        justify-content: space-around;
-    }
-
-    .customized-btn {
-        margin-top: 10px;
-        background-color: #007bff;
-        color: white;
-        border: none;
-        padding: 12px 20px; /* Increased padding */
-        font-size: 16px; /* Increased font size */
-        cursor: pointer;
-        border-radius: 6px; /* Slightly rounded corners */
-        transition: background 0.2s;
-    }
-
-    .customized-btn:hover {
-        background-color: #0056b3;
-    }
-
-    .customized-cancel-btn {
-        background-color: #dc3545;
-    }
-
-    .customized-cancel-btn:hover {
-        background-color: #c82333;
-    }
-
+    /* Add a border between Total Hours and Regular Holiday OT */
 
     </style>
+</head>
+<body id="page-top">
+
+    <!-- Page Wrapper -->
+    <div id="wrapper">
+
+<!-- Sidebar -->
+<ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+    <style>
+        .sidebar {
+            background-color: #FE5A1D !important;
+            background-image: none !important;
+            padding-top: 5px;
+        }
+    </style>
+    <!-- Sidebar - Brand -->
+    <a class="sidebar-brand d-flex align-items-center justify-content-center" href="dashboard.php">
+        <div class="sidebar-brand-icon">
+            <i class="fas fa-users"></i>
+        </div>
+        <div class="sidebar-brand-text mx-3">Human Resource System</div>
+    </a>
+
+    <!-- Divider -->
+    <hr class="sidebar-divider my-0">
+
+    <!-- Nav Item - Dashboard -->
+    <li class="nav-item active">
+        <a class="nav-link" href="dashboard.php">
+            <i class="fas fa-fw fa-tachometer-alt"></i>
+            <span>Dashboard</span></a>
+    </li>
+
+    <!-- Divider -->
+    <hr class="sidebar-divider">
+
+    <!-- Heading -->
+    <div class="sidebar-heading">
+        Submissions
+    </div>
+
+    <!-- Nav Item - Direct Link to DTR.php -->
+    <li class="nav-item">
+        <a class="nav-link text-white font-weight-bold" href="DTR.php" style="background-color: #db4104; border-radius: 5px;">
+            <i class="fas fa-fw fa-table text-white font-weight-bold"></i>
+            <span class="font-weight-bold">DTR Submission</span>
+        </a>
+    </li>
+
+    <!-- Nav Item - Bill -->
+    <li class="nav-item">
+        <a class="nav-link " href="Bills.php">
+            <i class="fas fa-file-invoice-dollar"></i>
+            <span>Bill Submission</span>
+        </a>
+    </li>
+
+    <!-- Divider -->
+    <hr class="sidebar-divider">
+
+    <!-- Heading -->
+    <div class="sidebar-heading">
+        Monitoring
+    </div>
+
+    <!-- Nav Item - Leave -->
+    <li class="nav-item">
+        <a class="nav-link" href="Leave.php">
+            <i class="fas fa-fw fa-chart-area"></i>
+            <span>Leave Monitoring</span></a>
+    </li>
+
+    <!-- Divider -->
+    <hr class="sidebar-divider">
+
+    <!-- Heading -->
+    <div class="sidebar-heading">
+        Management
+    </div>
+
+    <!-- Nav Item - Employee management -->
+    <li class="nav-item">
+        <a class="nav-link" href="EmployeeManagement.php">
+            <i class="fas fa-users-cog"></i>
+            <span>Employee Management</span>
+        </a>
+    </li>
+
+    <!-- Sidebar Toggler (Sidebar) -->
+    <div class="text-center d-none d-md-inline">
+        <button class="rounded-circle border-0" id="sidebarToggle"></button>
+    </div>
+</ul>
+<!-- End of Sidebar -->
+
+<!-- Content Wrapper -->
+<div id="content-wrapper" class="d-flex flex-column">
+
+    <!-- Main Content -->
+    <div id="content">
+
+        <!-- Topbar -->
+        <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+
+            <!-- Sidebar Toggle (Topbar) -->
+            <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                <i class="fa fa-bars"></i>
+            </button>
+
+            <div class="logo">
+                <img src="img/ATS_Logo.png" alt="Logo" width="250" height="50">
+            </div>
+
+            <!-- Topbar Navbar -->
+            <ul class="navbar-nav ml-auto">
+
+                <!-- Nav Item - User Information -->
+                <li class="nav-item dropdown no-arrow">
+                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <span class="mr-2 d-none d-lg-inline text-gray-600 small">Admin Manager</span>
+                        <img class="img-profile rounded-circle" src="img/undraw_profile.svg">
+                    </a>
+                    <!-- Dropdown - User Information -->
+                    <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
+                        <a class="dropdown-item" href="#" data-toggle="modal" data-target="#manageAccountModal">
+                            <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
+                            Manage Account
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
+                            <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                            Logout
+                        </a>
+                    </div>
+                </li>
+            </ul>
+        </nav>
+        <!-- End of Topbar -->
+
+        <!-- Begin Page Content -->
+        <div class="container-fluid">
+
+            <!-- Page Heading -->
+            <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                <h1 class="h3 mb-0 text-gray-800">DTR Submissions</h1>
+                <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-download fa-sm text-white-50"></i> Generate Report</a>
+            </div>
+
+        <!-- Main Content -->
+        <div id="content">
+            <!-- DTR Table -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-orange">DTR Submission</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                    <table class="table table-bordered" id="dtrTable" width="100%" cellspacing="0">
+    <thead>
+        <tr>
+            <th>No.</th>
+            <th>Employee No.</th>
+            <th>Employee Name</th>
+            <th>Category</th>
+            <th>General</th>
+            <th>Admin</th>
+            <th>Finance</th>
+            <th>Design</th>
+            <th>Board Repair</th>
+            <th>PM</th>
+            <th>Technical Support</th>
+            <th>Maintenance Support</th>
+            <th>Logistics & Comm.</th>
+            <th>CDT/Reports/Meetings</th>
+            <th>Warranty</th>
+            <th>Billable Service</th>
+            <th>Upgrade</th>
+            <th>Pre-Sales Support</th>
+            <th>Special Project</th>
+            <th>Total Hours</th>
+            
+            <th>Regular Holiday OT</th>
+            <th>Special Holiday OT</th>
+            <th>Regular OT</th>
+            <th>Night Diff OT</th>
+            <th>Salary Deduction</th>
+            <th>Leave Conversion</th>
+            <th>Leave Balances</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody id="dtrTableBody">
+        <!-- Example row with edit button -->
+        <tr>
+            <td>1</td>
+            <td contenteditable="false">A001</td>
+            <td contenteditable="false">Daominsy Yabut</td>
+            <td contenteditable="false">Hours</td>
+            <td contenteditable="false">8</td>
+            <td contenteditable="false">0</td>
+            <td contenteditable="false">0</td>
+            <td contenteditable="false">4</td>
+            <td contenteditable="false">0</td>
+            <td contenteditable="false">0</td>
+            <td contenteditable="false">0</td>
+            <td contenteditable="false">0</td>
+            <td contenteditable="false">0</td>
+            <td contenteditable="false">0</td>
+            <td contenteditable="false">0</td>
+            <td contenteditable="false">0</td>
+            <td contenteditable="false">0</td>
+            <td contenteditable="false">0</td>
+            <td contenteditable="false">0</td>
+            <td contenteditable="false">8</td>
+            <td contenteditable="false">0</td>
+            <td contenteditable="false">0</td>
+            <td contenteditable="false">0</td>
+            <td contenteditable="false">0</td>
+            <td contenteditable="false">0</td>
+            <td contenteditable="false">0</td>
+            <td contenteditable="false">0</td>
+            <td>
+                <button class="btn btn-success btn-sm edit-btn">
+                    <i class="fas fa-edit"></i> Edit
+                </button>
+            </td>
+        </tr>
+        <tr>
+            <td>2</td>
+            <td contenteditable="false">A003</td>
+            <td contenteditable="false">Rovic Balatbat</td>
+            <td contenteditable="false">Hours</td>
+            <td contenteditable="false">44</td>
+            <td contenteditable="false">0</td>
+            <td contenteditable="false">0</td>
+            <td contenteditable="false">4</td>
+            <td contenteditable="false">0</td>
+            <td contenteditable="false">22</td>
+            <td contenteditable="false">0</td>
+            <td contenteditable="false">0</td>
+            <td contenteditable="false">0</td>
+            <td contenteditable="false">0</td>
+            <td contenteditable="false">0</td>
+            <td contenteditable="false">0</td>
+            <td contenteditable="false">0</td>
+            <td contenteditable="false">0</td>
+            <td contenteditable="false">0</td>
+            <td contenteditable="false">8</td>
+            <td contenteditable="false">0</td>
+            <td contenteditable="false">0</td>
+            <td contenteditable="false">0</td>
+            <td contenteditable="false">0</td>
+            <td contenteditable="false">0</td>
+            <td contenteditable="false">0</td>
+            <td contenteditable="false">0</td>
+            <td>
+                <button class="btn btn-success btn-sm edit-btn">
+                    <i class="fas fa-edit"></i> Edit
+                </button>
+            </td>
+        </tr>
+    </tbody>
+</table>
+                    </div>
+                    <div class="text-right mt-3">
+                        <strong id="submissionCount">2 employees have submitted</strong>
+                    </div>
+                </div>
+            </div>
+            <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-orange">DTR Submission</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="dtrTable2" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>Employee No.</th>
+                                            <th>Employee Name</th>
+                                            <th>Status</th>
+                                            <th>Submission Date</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>EMP001</td>
+                                            <td>Tiger Nixon</td>
+                                            <td class="text-success font-weight-bold">Submitted</td>
+                                            <td>2024/02/15 08:30 AM</td>
+                                            <td><button class="btn btn-primary btn-sm view-btn">View</button></td>
+                                        </tr>
+                                        <tr>
+                                            <td>EMP002</td>
+                                            <td>Garrett Winters</td>
+                                            <td class="text-success font-weight-bold">Submitted</td>
+                                            <td>2024/02/16 01:45 PM</td>
+                                            <td><button class="btn btn-primary btn-sm view-btn">View</button></td>
+                                        </tr>
+                                        <tr>
+                                            <td>EMP003</td>
+                                            <td>Ashton Cox</td>
+                                            <td class="text-success font-weight-bold">Submitted</td>
+                                            <td>2024/02/17 10:15 AM</td>
+                                            <td><button class="btn btn-primary btn-sm view-btn">View</button></td>
+                                        </tr>
+                                        <tr>
+                                            <td>EMP004</td>
+                                            <td>Cedric Kelly</td>
+                                            <td class="text-success font-weight-bold">Submitted</td>
+                                            <td>2024/02/18 04:20 PM</td>
+                                            <td><button class="btn btn-primary btn-sm view-btn">View</button></td>
+                                        </tr>
+                                        <tr>
+                                            <td>EMP005</td>
+                                            <td>Airi Satou</td>
+                                            <td class="text-success font-weight-bold">Submitted</td>
+                                            <td>2024/02/19 09:05 AM</td>
+                                            <td><button class="btn btn-primary btn-sm view-btn">View</button></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="text-right mt-3">
+                                <strong id="submissionCount2">5/14 employees have submitted</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <!-- End of Main Content -->
+
+                <!-- Footer -->
+                <footer class="sticky-footer bg-white">
+                    <div class="container my-auto">
+                        <div class="copyright text-center my-auto">
+                            <span>Copyright &copy; AEHR Test Systems 2025</span>
+                        </div>
+                    </div>
+                </footer>
+                <!-- End of Footer -->
+
+            </div>
+            <!-- End of Content Wrapper -->
 
         </div>
+        <!-- End of Page Wrapper -->
+
+        <!-- Scroll to Top Button-->
+        <a class="scroll-to-top rounded" href="#page-top">
+            <i class="fas fa-angle-up"></i>
+        </a>
+
+        <!-- Logout Modal-->
+        <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
+                        <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                        <a class="btn btn-primary" href="index.php">Logout</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Manage Account Modal -->
+        <div class="modal fade" id="manageAccountModal" tabindex="-1" role="dialog" aria-labelledby="manageAccountModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="manageAccountModalLabel">Manage Account</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="manageAccountForm">
+                            <div class="form-group">
+                                <label for="adminUsername">New Username</label>
+                                <input type="text" class="form-control" id="adminUsername" name="adminUsername" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="adminPassword">New Password</label>
+                                <input type="password" class="form-control" id="adminPassword" name="adminPassword" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="confirmPassword">Confirm Password</label>
+                                <input type="password" class="form-control" id="confirmPassword" required>
+                            </div>
+                            <div id="passwordError" class="text-danger" style="display: none;">Passwords do not match!</div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" onclick="updateAdminAccount()">Save Changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Confirmation Modal -->
+        <div class="modal fade" id="confirmationModal" tabindex="-1" role="dialog" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="confirmationModalLabel">Success</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        Your account has been successfully updated.
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="location.reload();">OK</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- View Data Modal -->
+        <div class="modal fade" id="viewDataModal" tabindex="-1" role="dialog" aria-labelledby="viewDataModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xl" role="document"> <!-- Changed to modal-xl for extra large size -->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="viewDataModalLabel">Employee Details</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="table-responsive"> <!-- Added for horizontal scrolling -->
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Employee No.</th>
+                                        <th>Employee Name</th>
+                                        <th>Category</th>
+                                        <th>General</th>
+                                        <th>Admin</th>
+                                        <th>Finance</th>
+                                        <th>Design</th>
+                                        <th>Board Repair</th>
+                                        <th>PM</th>
+                                        <th>Technical Support</th>
+                                        <th>Maintenance Support</th>
+                                        <th>Logistics & Comm.</th>
+                                        <th>CDT/Reports/Meetings</th>
+                                        <th>Warranty</th>
+                                        <th>Billable Service</th>
+                                        <th>Upgrade</th>
+                                        <th>Pre-Sales Support</th>
+                                        <th>Special Project</th>
+                                        <th>Total Hours</th>
+                                        <th>Regular Holiday OT</th>
+                                        <th>Special Holiday OT</th>
+                                        <th>Regular OT</th>
+                                        <th>Night Diff OT</th>
+                                        <th>Salary Deduction</th>
+                                        <th>Leave Conversion</th>
+                                        <th>Leave Balances</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td id="viewEmpNo"></td>
+                                        <td id="viewEmpName"></td>
+                                        <td id="viewCategory"></td>
+                                        <td id="viewGeneral"></td>
+                                        <td id="viewAdmin"></td>
+                                        <td id="viewFinance"></td>
+                                        <td id="viewDesign"></td>
+                                        <td id="viewBoardRepair"></td>
+                                        <td id="viewPM"></td>
+                                        <td id="viewTechnicalSupport"></td>
+                                        <td id="viewMaintenanceSupport"></td>
+                                        <td id="viewLogisticsComm"></td>
+                                        <td id="viewCDTReportsMeetings"></td>
+                                        <td id="viewWarranty"></td>
+                                        <td id="viewBillableService"></td>
+                                        <td id="viewUpgrade"></td>
+                                        <td id="viewPreSalesSupport"></td>
+                                        <td id="viewSpecialProject"></td>
+                                        <td id="viewTotalHours"></td>
+                                        <td id="viewRegularHolidayOT"></td>
+                                        <td id="viewSpecialHolidayOT"></td>
+                                        <td id="viewRegularOT"></td>
+                                        <td id="viewNightDiffOT"></td>
+                                        <td id="viewSalaryDeduction"></td>
+                                        <td id="viewLeaveConversion"></td>
+                                        <td id="viewLeaveBalances"></td>
+                                        <td id="viewStatus"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Success Modal -->
+        <div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="successModalLabel">Success</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        Successfully edited field.
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bootstrap core JavaScript-->
+        <script src="vendor/jquery/jquery.min.js"></script>
+        <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+        <!-- Core plugin JavaScript-->
+        <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+
+        <!-- Custom scripts for all pages-->
+        <script src="js/sb-admin-2.min.js"></script>
+
+        <!-- DataTables JavaScript -->
+        <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+        <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap4.min.js"></script>
+
+        <!-- Custom JavaScript for Edit/Save functionality -->
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const editButtons = document.querySelectorAll('.edit-btn');
+
+                editButtons.forEach(button => {
+                    button.addEventListener('click', function () {
+                        const row = this.closest('tr');
+                        const cells = row.querySelectorAll('td');
+                        const isEditing = row.getAttribute('data-editing') === 'true';
+
+                        if (isEditing) {
+                            // Save logic
+                            let hasChanges = false;
+                            cells.forEach(cell => {
+                                if (cell.getAttribute('contenteditable') === 'true') {
+                                    cell.setAttribute('contenteditable', 'false');
+                                    if (cell.textContent !== cell.getAttribute('data-original')) {
+                                        hasChanges = true;
+                                    }
+                                }
+                            });
+
+                            if (hasChanges) {
+                                // Show success modal
+                                $('#successModal').modal('show');
+                            }
+
+                            // Change button back to Edit
+                            this.innerHTML = '<i class="fas fa-edit"></i> Edit';
+                            this.classList.remove('btn-warning');
+                            this.classList.add('btn-success');
+                            row.setAttribute('data-editing', 'false');
+                        } else {
+                            // Edit logic
+                            cells.forEach(cell => {
+                                if (cell !== cells[cells.length - 1] && cell !== cells[cells.length - 2]) {
+                                    cell.setAttribute('contenteditable', 'true');
+                                    cell.setAttribute('data-original', cell.textContent);
+                                }
+                            });
+
+                            // Change button to Save
+                            this.innerHTML = '<i class="fas fa-save"></i> Save';
+                            this.classList.remove('btn-success');
+                            this.classList.add('btn-warning');
+                            row.setAttribute('data-editing', 'true');
+                        }
+                    });
+                });
+            });
+
+            // Function to handle "View" button click
+            document.addEventListener("DOMContentLoaded", function () {
+                const viewButtons = document.querySelectorAll('.view-btn');
+                viewButtons.forEach(button => {
+                    button.addEventListener('click', function () {
+                        // Get the row data
+                        const row = this.closest('tr');
+                        const empNo = row.cells[0].textContent;
+                        const empName = row.cells[1].textContent;
+                        const status = row.cells[2].textContent;
+                        const submissionDate = row.cells[3].textContent;
+
+                        // Fetch additional data (replace with actual data fetching logic)
+                        const additionalData = {
+                            Category: "Category Data",
+                            General: "General Data",
+                            Admin: "Admin Data",
+                            Finance: "Finance Data",
+                            Design: "Design Data",
+                            BoardRepair: "Board Repair Data",
+                            PM: "PM Data",
+                            TechnicalSupport: "Technical Support Data",
+                            MaintenanceSupport: "Maintenance Support Data",
+                            LogisticsComm: "Logistics & Comm. Data",
+                            CDTReportsMeetings: "CDT/Reports/Meetings Data",
+                            Warranty: "Warranty Data",
+                            BillableService: "Billable Service Data",
+                            Upgrade: "Upgrade Data",
+                            PreSalesSupport: "Pre-Sales Support Data",
+                            SpecialProject: "Special Project Data",
+                            TotalHours: "Total Hours Data",
+                            RegularHolidayOT: "Regular Holiday OT Data",
+                            SpecialHolidayOT: "Special Holiday OT Data",
+                            RegularOT: "Regular OT Data",
+                            NightDiffOT: "Night Diff OT Data",
+                            SalaryDeduction: "Salary Deduction Data",
+                            LeaveConversion: "Leave Conversion Data",
+                            LeaveBalances: "Leave Balances Data"
+                        };
+
+                        // Populate the modal with the data
+                        document.getElementById('viewEmpNo').textContent = empNo;
+                        document.getElementById('viewEmpName').textContent = empName;
+                        document.getElementById('viewCategory').textContent = additionalData.Category;
+                        document.getElementById('viewGeneral').textContent = additionalData.General;
+                        document.getElementById('viewAdmin').textContent = additionalData.Admin;
+                        document.getElementById('viewFinance').textContent = additionalData.Finance;
+                        document.getElementById('viewDesign').textContent = additionalData.Design;
+                        document.getElementById('viewBoardRepair').textContent = additionalData.BoardRepair;
+                        document.getElementById('viewPM').textContent = additionalData.PM;
+                        document.getElementById('viewTechnicalSupport').textContent = additionalData.TechnicalSupport;
+                        document.getElementById('viewMaintenanceSupport').textContent = additionalData.MaintenanceSupport;
+                        document.getElementById('viewLogisticsComm').textContent = additionalData.LogisticsComm;
+                        document.getElementById('viewCDTReportsMeetings').textContent = additionalData.CDTReportsMeetings;
+                        document.getElementById('viewWarranty').textContent = additionalData.Warranty;
+                        document.getElementById('viewBillableService').textContent = additionalData.BillableService;
+                        document.getElementById('viewUpgrade').textContent = additionalData.Upgrade;
+                        document.getElementById('viewPreSalesSupport').textContent = additionalData.PreSalesSupport;
+                        document.getElementById('viewSpecialProject').textContent = additionalData.SpecialProject;
+                        document.getElementById('viewTotalHours').textContent = additionalData.TotalHours;
+                        document.getElementById('viewRegularHolidayOT').textContent = additionalData.RegularHolidayOT;
+                        document.getElementById('viewSpecialHolidayOT').textContent = additionalData.SpecialHolidayOT;
+                        document.getElementById('viewRegularOT').textContent = additionalData.RegularOT;
+                        document.getElementById('viewNightDiffOT').textContent = additionalData.NightDiffOT;
+                        document.getElementById('viewSalaryDeduction').textContent = additionalData.SalaryDeduction;
+                        document.getElementById('viewLeaveConversion').textContent = additionalData.LeaveConversion;
+                        document.getElementById('viewLeaveBalances').textContent = additionalData.LeaveBalances;
+                        document.getElementById('viewStatus').textContent = status;
+
+                        // Show the modal
+                        $('#viewDataModal').modal('show');
+                    });
+                });
+            });
+
+            $(document).ready(function() {
+        // Initialize DataTables for the first table
+        $('#dtrTable').DataTable({
+            "paging": false,
+            "searching": true,
+            "ordering": true,
+            "info": true,
+            "lengthChange": true,
+            "pageLength": 10,
+            "dom": 'lftip'
+        });
+
+        // Initialize DataTables for the second table
+        $('#dtrTable2').DataTable({
+            "paging": false,
+            "searching": true,
+            "ordering": true,
+            "info": true,
+            "lengthChange": true,
+            "pageLength": 10,
+            "dom": 'lftip'
+        });
+    });
+        </script>
     </body>
 </html>
+        

@@ -577,7 +577,7 @@ $(document).ready(function() {
         <h6 class="m-0 font-weight-bold text-primary">Employee Table</h6>
         <input type="text" id="searchEmployee" class="form-control" style="width: 250px;" placeholder="Search Employee...">
     </div>
-    <div class="table-responsive">
+    <div class="table-responsive card-body">
         <table class="table table-bordered employee-table" id="employeeTable">
             <thead>
                 <tr>

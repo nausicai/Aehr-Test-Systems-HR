@@ -1,36 +1,42 @@
 <?php
-session_start();
-include 'db.php'; // Database connection
+session_name("admin_session"); // Set a custom session name for admin
+session_start([
+    'use_strict_mode' => 1,
+    'cookie_httponly' => 1,
+    'cookie_secure' => 0,
+    'use_only_cookies' => 1,
+    'sid_length' => 128
+]);
 
-header('Content-Type: application/json'); // Ensure JSON response
+include 'db.php';
+header('Content-Type: application/json');
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $username = trim($_POST['adminUsername']);
-    $password = trim($_POST['adminPassword']);
+    $admin_account = trim($_POST['adminUsername']);
+    $admin_password = trim($_POST['adminPassword']);
 
-    // Prevent SQL Injection
-    $username = mysqli_real_escape_string($conn, $username);
+    $stmt = $conn->prepare("SELECT id, account, password FROM admin WHERE account = ?");
+    $stmt->bind_param("s", $admin_account);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
-    // Fetch admin details
-    $sql = "SELECT * FROM admin WHERE account = '$username'";
-    $result = $conn->query($sql);
-
-    if ($result->num_rows == 1) {
-        $row = $result->fetch_assoc();
-        $hashedPassword = $row['password'];
-
-        // Verify password
-        if (password_verify($password, $hashedPassword)) {
-            $_SESSION['admin'] = $username; // Start session
+    if ($result->num_rows === 1) {
+        $admin = $result->fetch_assoc();
+        
+        if (password_verify($admin_password, $admin['password'])) {
+            session_regenerate_id(true); // Prevent session fixation
+            $_SESSION['admin_id'] = $admin['id'];
+            $_SESSION['admin_account'] = $admin['account'];
+            
             echo json_encode(["status" => "success", "redirect" => "dashboard.php"]);
             exit();
-        } else {
-            echo json_encode(["status" => "error", "message" => "Invalid username or password."]);
-            exit();
         }
-    } else {
-        echo json_encode(["status" => "error", "message" => "Invalid username or password."]);
-        exit();
     }
+    
+    echo json_encode(["status" => "error", "message" => "Invalid credentials"]);
+    exit();
 }
+
+header("Location: index.php");
+exit();
 ?>

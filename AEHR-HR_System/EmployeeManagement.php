@@ -1,3 +1,7 @@
+<?php
+include "session/admin.php";
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -9,7 +13,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>H.R. System - Employee Management</title>
+    <title>AEHR - H.R. System - Employee Management</title>
 
     <!-- Custom fonts for this template-->
     <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
@@ -19,7 +23,55 @@
 
     <!-- Custom styles for this template-->
     <link href="css/sb-admin-2.min.css" rel="stylesheet">
+    <style>
+        /* Orange Theme for Table Headers */
+        .employee-table thead th {
+            background-color: #FE5A1D !important;
+            color: white !important;
+        }
 
+        /* Orange Theme for "Employee Table" Text */
+        .card-header h6 {
+            color: #FE5A1D !important;
+        }
+
+        /* Orange Theme for View Buttons */
+        .viewEmployee {
+            background-color: #FE5A1D !important;
+            border-color: #FE5A1D !important;
+            color: white !important;
+        }
+
+        .viewEmployee:hover {
+            background-color: #db4104 !important;
+            border-color: #db4104 !important;
+        }
+
+        /* Sidebar Orange Theme */
+        .sidebar {
+            background-color: #FE5A1D !important;
+            background-image: none !important;
+            padding-top: 5px;
+        }
+        /* Orange Theme for Pop-up Modal Headers */
+.modal-header {
+    background-color: #FE5A1D !important; /* Orange background */
+    color: white !important; /* White text */
+    border-bottom: 1px solid #db4104 !important; /* Darker orange border */
+}
+
+/* Ensure the close button (×) is visible */
+.modal-header .close {
+    color: white !important; /* White close button */
+    text-shadow: none; /* Remove default text shadow */
+    opacity: 1; /* Ensure full visibility */
+}
+
+/* Hover effect for the close button */
+.modal-header .close:hover {
+    color: #f8f9fa !important; /* Light gray on hover */
+}
+    </style>
 </head>
 
 <body id="page-top">
@@ -38,13 +90,81 @@
                 }
 
                 </style>
-            <!-- Sidebar - Brand -->
-            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="dashboard.php">
-                <div class="sidebar-brand-icon">
-                    <i class="fas fa-users"></i>
-                </div>
-                <div class="sidebar-brand-text mx-3">Human Resource System</div>
-            </a>
+           <a class="sidebar-brand" href="dashboard.php" style="display: block; padding: 12px 0; transition: all 0.3s ease;">
+    <div style="display: flex; align-items: center; justify-content: center; font-family: 'Nunito', sans-serif; 
+              transition: all 0.3s ease;">
+        <!-- Animated Logo Container (now with logo-icon class) -->
+        <div class="logo-icon" style="width: 42px; height: 42px; background: rgba(255,255,255,0.1); border: 1.8px solid white;
+                  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+                  margin-right: 14px; transition: all 0.3s ease; transform-origin: center;">
+            <i class="fas fa-users" style="color: white; font-size: 1.2rem; transition: all 0.3s ease;"></i>
+        </div>
+        
+        <!-- Text Content (now wrapped in logo-text div) -->
+        <div class="logo-text" style="text-align: left; transition: all 0.3s ease;">
+            <div style="font-weight: 800; font-size: 1.3rem; color: white; line-height: 1.2;
+                      transition: all 0.2s ease; display: inline-block;">
+                <span style="transition: all 0.3s ease;">HR</span> SYSTEM
+            </div>
+            <div style="font-weight: 500; font-size: 0.65rem; color: rgba(255,255,255,0.8); 
+                      letter-spacing: 1.8px; margin-top: 4px; text-transform: uppercase;
+                      transition: all 0.3s ease;">
+                AEHR TEST SYSTEMS
+            </div>
+        </div>
+    </div>
+</a>
+
+<style>
+    /* Hover Effects */
+    .sidebar-brand:hover {
+        transform: translateY(-2px);
+    }
+    
+    .sidebar-brand:hover .fa-users {
+        transform: rotate(10deg) scale(1.1);
+        color: #f8f8f8;
+    }
+    
+    .sidebar-brand:hover div div:first-child {
+        letter-spacing: 0.5px;
+    }
+    
+    .sidebar-brand:hover div div:last-child {
+        letter-spacing: 2px;
+        color: white !important;
+    }
+    
+    .sidebar-brand:hover > div > div:first-child {
+        transform: scale(1.05);
+        box-shadow: 0 0 15px rgba(255,255,255,0.2);
+        background: rgba(255,255,255,0.15);
+    }
+    
+    /* Pulse Animation */
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+    
+    .sidebar-brand:active > div > div:first-child {
+        animation: pulse 0.5s ease;
+    }
+    /* Sidebar minimized state */
+.sidebar.toggled .sidebar-brand .logo-text {
+    display: none !important;
+}
+
+.sidebar.toggled .sidebar-brand .logo-icon {
+    margin-right: 0;
+}
+
+.sidebar.toggled .sidebar-brand > div {
+    justify-content: center;
+    width: 115%;
+}
+</style>
 
             <!-- Divider -->
             <hr class="sidebar-divider my-0">
@@ -152,12 +272,13 @@
                         <li class="nav-item dropdown no-arrow">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span class="mr-2 d-none d-lg-inline text-gray-600 small">Admin Manager</span>
-                                <img class="img-profile rounded-circle" src="img/undraw_profile.svg">
+                                <span class="mr-2 d-none d-lg-inline text-gray-600 small">Account Manager</span>
+                                <img class="img-profile" src="img/undraw_posting_photo.svg">
                             </a>
                             <!-- Dropdown - User Information -->
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
-                                <!-- Open Manage Account Modal -->
+                                
+                            <!-- Open Manage Account Modal -->
                                 <a class="dropdown-item" href="#" data-toggle="modal" data-target="#manageAccountModal">
                                     <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
                                     Manage Account
@@ -201,12 +322,32 @@
                                     </form>
                                 </div>
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                                    <button type="button" class="btn btn-primary" onclick="updateAdminAccount()">Save Changes</button>
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal" style="background-color: #858796; border-color: #858796">Cancel</button>
+                                    <button type="button" class="btn btn-primary" onclick="updateAdminAccount()" style="background-color: green; border-color: green">Save Changes</button>
                                 </div>
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- Logout Modal-->
+    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                    <a class="btn btn-primary" href="logout_admin.php" style="background-color: red; border-color: red">Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
                     <script>
                         function updateAdminAccount() {
                             let username = document.getElementById('adminUsername').value.trim();
@@ -317,25 +458,25 @@
                     <input type="email" id="new_emp_email" name="email" class="form-control" required>
 
                     <label><strong>Phone:</strong></label>
-                    <input type="text" id="new_emp_phone" name="phone" class="form-control" required>
+                    <input type="text" id="new_emp_phone" name="phone" class="form-control" >
 
                     <label><strong>Department:</strong></label>
-                    <input type="text" id="new_emp_department" name="department" class="form-control" required>
+                    <input type="text" id="new_emp_department" name="department" class="form-control" >
 
                     <label><strong>Position:</strong></label>
-                    <input type="text" id="new_emp_position" name="position" class="form-control" required>
+                    <input type="text" id="new_emp_position" name="position" class="form-control" >
 
                     <label><strong>HRS Account:</strong></label>
                     <input type="text" id="new_emp_hrs_account" name="hrs_account" class="form-control">
 
                     <label><strong>Date of Birth:</strong></label>
-                    <input type="date" id="new_emp_dob" name="date_of_birth" class="form-control" required>
+                    <input type="date" id="new_emp_dob" name="date_of_birth" class="form-control" >
 
                     <label><strong>Date Hired:</strong></label>
-                    <input type="date" id="new_emp_hired" name="date_hired" class="form-control" required>
+                    <input type="date" id="new_emp_hired" name="date_hired" class="form-control" >
 
                     <label><strong>Address:</strong></label>
-                    <textarea id="new_emp_address" name="address" class="form-control" required></textarea>
+                    <textarea id="new_emp_address" name="address" class="form-control" ></textarea>
                 </div>
 
                 <div class="modal-footer">
@@ -570,15 +711,54 @@ $(document).ready(function() {
             ?>
 
 
+<style>
+    .styled-select {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 14px;
+        background-color: white;
+        cursor: pointer;
+        transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+    }
+
+    .styled-select:hover {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 8px rgba(245, 124, 0, 0.2);
+    }
+
+    .styled-select:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 12px rgba(245, 124, 0, 0.3);
+    }
+    #searchEmployee::placeholder {
+        color: white;
+        opacity: 1; /* Ensures visibility */
+        font-weight: normal;
+    }
+</style>
 
 <!-- Employee Table -->
 <div class="card shadow mb-4">
     <div class="card-header py-3 d-flex justify-content-between align-items-center">
         <h6 class="m-0 font-weight-bold text-primary">Employee Table</h6>
-        <input type="text" id="searchEmployee" class="form-control" style="width: 250px;" placeholder="Search Employee...">
+        
     </div>
-    <div class="table-responsive card-body">
-        <table class="table table-bordered employee-table" id="employeeTable">
+    <div class="table-responsive card-body d-flex justify-content-between align-items-center" >
+    <p class="m-0">Total number of Employees: <span id="totalEmployees"></span></p>
+    
+    <div style="position: relative; display: flex; align-items: center;">
+        <i class="fas fa-search" style="position: absolute; left: 12px; color: white; font-size: 14px;"></i>
+        <input type="text" id="searchEmployee" class="styled-select" placeholder="Search Employee..."
+            style="width: 180px; height: 38px; padding: 8px 8px 8px 35px; font-size: 14px; border: none; border-radius: 5px;
+                   outline: none; font-weight: normal; background-color: #6366F1; color: white; 
+                   box-shadow: none; transition: 0.2s;">
+    </div>
+</div>
+
+
+        <table class="table table-bordered employee-table" id="employeeTable" >
             <thead>
                 <tr>
                     <th>Employee No.</th>
@@ -592,45 +772,182 @@ $(document).ready(function() {
                 </tr>
             </thead>
             <tbody id="employeeTableBody">
-                <?php
-                if ($result->num_rows > 0) {
-                    while ($row = $result->fetch_assoc()) {
-                        echo "<tr>";
-                        echo "<td><input type='checkbox' class='delete-checkbox d-none' value='" . htmlspecialchars($row['employee_no']) . "'> " . htmlspecialchars($row['employee_no']) . "</td>";
-                        echo "<td>" . htmlspecialchars($row['name']) . "</td>";
-                        echo "<td>" . htmlspecialchars($row['email']) . "</td>";
-                        echo "<td>" . htmlspecialchars($row['phone']) . "</td>";
-                        echo "<td>" . htmlspecialchars($row['department']) . "</td>";
-                        echo "<td>" . htmlspecialchars($row['position']) . "</td>";
-                        echo "<td class='hrsAccountColumn'>" . htmlspecialchars($row['hrs_account']) . "</td>";
-                        echo "<td><button class='btn btn-primary btn-sm viewEmployee' data-id='" . $row['employee_no'] . "'>View</button></td>";
-                        echo "</tr>";
-                    }
-                } else {
-                    echo "<tr><td colspan='8' class='text-center'>No employees found</td></tr>";
-                }
-                ?>
-            </tbody>
+    <?php
+    $employeeCount = 0; // Initialize employee count
+    if ($result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $employeeCount++; // Increment count for each employee
+            echo "<tr>";
+            echo "<td><input type='checkbox' class='delete-checkbox d-none' value='" . htmlspecialchars($row['employee_no']) . "'> " . htmlspecialchars($row['employee_no']) . "</td>";
+            echo "<td>" . htmlspecialchars($row['name']) . "</td>";
+            echo "<td>" . htmlspecialchars($row['email']) . "</td>";
+            echo "<td>" . htmlspecialchars($row['phone']) . "</td>";
+            echo "<td>" . htmlspecialchars($row['department']) . "</td>";
+            echo "<td>" . htmlspecialchars($row['position']) . "</td>";
+            echo "<td class='hrsAccountColumn'>" . htmlspecialchars($row['hrs_account']) . "</td>";
+            echo "<td>
+                    <button class='btn btn-primary btn-sm viewEmployee' data-id='" . $row['employee_no'] . "'>View</button>
+                    <button class='reset-password-btn' data-id='" . $row['employee_no'] . "'>Reset</button>
+                  </td>";
+            echo "</tr>";
+        }
+    } else {
+        echo "<tr><td colspan='8' class='text-center'>No employees found</td></tr>";
+    }
+    ?>
+</tbody>
+
         </table>
     </div>
 </div>
 
-<!-- JavaScript for Table Search Functionality -->
-<script>
-    document.getElementById("searchEmployee").addEventListener("keyup", function() {
-        var searchValue = this.value.toLowerCase();
-        var tableRows = document.querySelectorAll("#employeeTable tbody tr");
+<!-- Confirmation Modal (Unique CSS) -->
+<div id="customResetModal" class="custom-reset-modal">
+    <div class="custom-reset-content">
+        <h3>Confirm Password Reset</h3>
+        <p>Are you sure you want to reset this employee's password?</p>
+        <input type="hidden" id="selectedEmployee">
+        <button class="custom-reset-btn cancel-btn" onclick="closeResetModal()">Cancel</button>
+        <button class="custom-reset-btn confirm-btn" onclick="confirmPasswordReset()">Confirm</button>
+    </div>
+</div>
 
-        tableRows.forEach(function(row) {
-            var rowText = row.textContent.toLowerCase();
-            if (rowText.includes(searchValue)) {
-                row.style.display = "";
-            } else {
-                row.style.display = "none";
-            }
+<!-- Success Modal -->
+<div id="successResetModal" class="custom-reset-modal">
+    <div class="custom-reset-content">
+        <h3>Success</h3>
+        <p>Password has been successfully reset.</p>
+        <button class="custom-reset-btn success-btn" onclick="closeSuccessResetModal()">OK</button>
+    </div>
+</div>
+
+<!-- Unique CSS to prevent conflicts -->
+<style>
+    .custom-reset-modal {
+        display: none;
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+    }
+    .custom-reset-content {
+        background: white;
+        width: 320px;
+        padding: 20px;
+        margin: 15% auto;
+        border-radius: 8px;
+        text-align: center;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    .custom-reset-btn {
+        padding: 10px 15px;
+        border: none;
+        cursor: pointer;
+        margin: 5px;
+        border-radius: 5px;
+    }
+    .cancel-btn {
+        background-color: red;
+        color: white;
+    }
+    .confirm-btn {
+        background-color: green;
+        color: white;
+    }
+    .success-btn {
+        background-color: blue;
+        color: white;
+    }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let selectedEmployee = "";
+
+        // Open confirmation modal when Reset button is clicked
+        document.querySelectorAll(".reset-password-btn").forEach(button => {
+            button.addEventListener("click", function () {
+                selectedEmployee = this.getAttribute("data-id");
+                document.getElementById("selectedEmployee").value = selectedEmployee;
+                document.getElementById("customResetModal").style.display = "block";
+            });
+        });
+
+        // Close modals
+        function closeResetModal() {
+            document.getElementById("customResetModal").style.display = "none";
+        }
+
+        function closeSuccessResetModal() {
+            document.getElementById("successResetModal").style.display = "none";
+            location.reload(); // Refresh to update data
+        }
+
+        // Confirm password reset
+        function confirmPasswordReset() {
+            let employeeNo = document.getElementById("selectedEmployee").value;
+
+            // Send AJAX request to reset_pass.php
+            fetch("CRUD/reset_pass.php", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: "employee_no=" + encodeURIComponent(employeeNo)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "success") {
+                    closeResetModal(); // Close confirmation modal
+                    document.getElementById("successResetModal").style.display = "block"; // Show success modal
+                } else {
+                    alert("Error: " + data.message);
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        }
+
+        // Attach functions to global scope
+        window.closeResetModal = closeResetModal;
+        window.closeSuccessResetModal = closeSuccessResetModal;
+        window.confirmPasswordReset = confirmPasswordReset;
+    });
+</script>
+
+
+<!-- JavaScript for Table Search and Employee Count -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Function to update the employee count
+        function updateEmployeeCount() {
+            var visibleRows = document.querySelectorAll("#employeeTable tbody tr:not([style*='display: none'])");
+            document.getElementById("totalEmployees").textContent = visibleRows.length;
+        }
+
+        // Initialize count on page load
+        updateEmployeeCount();
+
+        // Search functionality
+        document.getElementById("searchEmployee").addEventListener("keyup", function() {
+            var searchValue = this.value.toLowerCase();
+            var tableRows = document.querySelectorAll("#employeeTable tbody tr");
+
+            tableRows.forEach(function(row) {
+                var rowText = row.textContent.toLowerCase();
+                if (rowText.includes(searchValue)) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            });
+
+            // Update count after search filtering
+            updateEmployeeCount();
         });
     });
 </script>
+
 
 <!-- CSS for Table -->
 <style>
@@ -963,25 +1280,7 @@ $(document).ready(function() {
         <i class="fas fa-angle-up"></i>
     </a>
 
-    <!-- Logout Modal-->
-    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
-                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
-                </div>
-                <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                    <a class="btn btn-primary" href="index.php">Logout</a>
-                </div>
-            </div>
-        </div>
-    </div>
+    
 
     <!-- Bootstrap core JavaScript-->
     <script src="vendor/jquery/jquery.min.js"></script>
@@ -993,7 +1292,8 @@ $(document).ready(function() {
     <!-- Custom scripts for all pages-->
     <script src="js/sb-admin-2.min.js"></script>
 
-   
+
+
 
 </body>
 

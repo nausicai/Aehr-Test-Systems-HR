@@ -12,5 +12,8 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+// Set the PHP timezone to Philippine Time
+date_default_timezone_set('Asia/Manila');
+
 // The connection is now ready to use in other PHP files
 ?>

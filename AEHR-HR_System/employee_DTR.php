@@ -1,842 +1,1207 @@
+<?php
+include "session/employee.php"
+?>
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <title>H.R. System - DTR Submission</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Time Record</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    
+<style>
+        :root {
+            --primary-color: #f57c00;
+            --secondary-color: #ff6b6b;
+            --background-color: #f4f4f4;
+            --text-color: #333;
+            --table-header-color: #FE5A1D;
+            --button-hover: #d32f2f;
+            --modal-background: rgba(0, 0, 0, 0.5);
+            --modal-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            --transition-speed: 0.3s;
+        }
 
-    <!-- Custom fonts for this template-->
-    <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
-    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+        body {
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-image: url('img/AEHR_bg.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative;
+    overflow: hidden;
+    color: var(--text-color);
+    margin: 0; /* Add this to remove default margin */
+    overflow-y: auto; /* Enables vertical scrolling */
+}
 
-    <!-- Custom styles for this template-->
-    <link href="css/sb-admin-2.min.css" rel="stylesheet">
+/* Dark overlay that will cover ENTIRE page */
+body::before {
+    content: "";
+    position: fixed; /* Changed from absolute to fixed */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: -1;
+}
 
-    <!-- DataTables CSS -->
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap4.min.css">
 
-    <!-- Custom styles for tables -->
-    <style>
-        .table thead th {
-            background-color: #FE5A1D;
+.dashboard {
+    width: 95%;
+    max-width: 1200px;
+    padding: 20px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    text-align: center;
+    margin: 20px 0;
+    position: relative;
+    background: rgba(255, 255, 255, 0.85); /* Semi-transparent white */
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: none; /* Ensures no blur effect */
+    
+}
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .logo {
+            width: 265px;
+        }
+
+        .form-container {
+            text-align: left;
+            margin-top: 20px;
+            max-height: 500px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .form-container h3 {
+            color: var(--text-color);
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 15px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        .input-group input {
+            width: 98%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color var(--transition-speed);
+        }
+
+        .input-group input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        /* Back Button Hover Effect */
+button:hover .back-button-icon {
+  width: calc(100% - 8px) !important;
+}
+
+/* Back Button Text Alignment */
+button p {
+  position: relative;
+  z-index: 5;
+  margin: 0;
+  line-height: 56px;
+}
+
+        .btn {
+            padding: 12px 24px;
+            background: var(--primary-color);
             color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+            margin-top: 10px;
+            width: 100%;
+            max-width: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
-        .table tbody tr:hover {
-            background-color: #f8f9fa;
+        .btn:hover {
+            background: var(--button-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
         }
 
-        .table tbody tr td {
-            color: #333;
+        .btn:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
-        .btn-primary {
-            background-color: #FE5A1D;
-            border-color: #FE5A1D;
+        .btn i {
+            font-size: 18px;
         }
 
-        .btn-primary:hover {
-            background-color: #db4104;
-            border-color: #db4104;
+       
+
+        .logout-btn {
+            background: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
-        .btn-success {
-            background-color: #28a745;
-            border-color: #28a745;
+        .logout-btn:hover {
+            background: #555;
         }
 
-        .btn-success:hover {
-            background-color: #218838;
-            border-color: #1e7e34;
-        }
-
-        .btn-warning {
-            background-color: #ffc107;
-            border-color: #ffc107;
-        }
-
-        .btn-warning:hover {
-            background-color: #e0a800;
-            border-color: #d39e00;
-        }
-
-        .card {
-            border: 3px solidrgb(0, 0, 0);
-        }
-
-        .card-header {
-            background-color: rgb(255, 255, 255);
-            color: white;
-        }
-
-        .dataTables_wrapper .dataTables_paginate .paginate_button {
-            color: #FE5A1D !important;
-        }
-
-        .dataTables_wrapper .dataTables_paginate .paginate_button.current {
-            background-color: rgb(0, 0, 0) !important;
-            border-color: rgb(0, 0, 0) !important;
-            color: white !important;
-        }
-
-        .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
-            background-color: rgb(0, 0, 0) !important;
-            border-color: rgb(0, 0, 0) !important;
-            color: white !important;
-        }
-
-        .modal-content {
-            border-radius: 10px;
-            border: 2px solid rgb(0, 0, 0);
-        }
-
-        .modal-header {
-            background-color: #FE5A1D;
-            color: white;
-            border-top-left-radius: 10px;
-            border-top-right-radius: 10px;
-        }
-
-        .modal-body {
+        .table-container {
+            margin-top: 20px;
             overflow-x: auto;
         }
 
-        .modal-body table {
+        table {
             width: 100%;
-            margin-bottom: 0;
-            min-width: 1200px;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            font-size: 14px;
         }
 
-        .modal-body table th {
-            background-color: #FE5A1D;
+        table th, table td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        table th {
+            background-color: var(--table-header-color);
             color: white;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 1;
         }
 
-        .modal-body table td {
-            padding: 10px;
+        table tr:nth-child(even) {
+            background-color: #f9f9f9;
         }
 
-        .modal-footer {
-            border-top: 1px solid #FE5A1D;
+        table tr:hover {
+            background-color: #f1f1f1;
+            transition: background-color var(--transition-speed);
         }
 
-        .modal-footer .btn {
-            background-color: #FE5A1D;
-            border-color: #FE5A1D;
+        input[type="number"] {
+    -moz-appearance: textfield;
+}
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+
+        #submitButton.resubmit {
+    background-color: #ff9800;
+}
+
+#submitButton.resubmit:hover {
+    background-color: #f57c00;
+}
+
+.resubmit-btn {
+    background-color: #ff9800 !important;
+}
+
+.resubmit-btn:hover {
+    background-color: #f57c00 !important;
+}
+        /* Modal Container */
+        .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--modal-background);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Visible Modal */
+.modal.show {
+    display: flex;
+}
+
+
+/* Animated Modal Content */
+.modal.show .modal-content {
+    transform: scale(1);
+    opacity: 1;
+}
+
+/* Modal Content Box */
+.modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 400px;
+    position: relative;
+    margin: 20px;
+    box-shadow: var(--modal-shadow);
+}
+
+/* Close Button */
+.modal-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+.modal-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+        .cancel-btn {
+            background: #555;
+        }
+
+        .cancel-btn:hover {
+            background: #333;
+        }
+
+     /* Remove close button from confirmation modal */
+#confirmationModal .modal-close {
+    display: none;
+}
+
+/* Center success modal button */
+#successModal .modal-content {
+    text-align: center;
+}
+
+#successModal .btn {
+    margin: 0 auto;
+}
+
+/* Ensure modal backdrop disappears */
+.modal.show {
+    background: var(--modal-background);
+}
+
+/* Modal Animation */
+@keyframes fadeIn {
+    from {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Button Styles */
+.customized-modal-buttons {
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.customized-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background 0.2s;
+}
+
+.customized-btn:hover {
+    background-color: #0056b3;
+}
+
+        .back-btn {
+    position: absolute;
+    z-index: 1000;
+    top: 15px;
+    left: 15px;
+    background: linear-gradient(135deg, #ff7043, #d84315);
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease-in-out;
+}
+
+.back-btn i {
+    font-size: 18px;
+}
+
+.back-btn:hover {
+    background: linear-gradient(135deg, #d84315, #ff7043);
+    transform: scale(1.05);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.3);
+}
+
+
+        .form-container table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .form-container th, .form-container td {
+            padding: 8px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        .form-container th {
+            background-color: var(--table-header-color);
             color: white;
+            font-weight: 600;
         }
 
-        .modal-footer .btn:hover {
-            background-color: #db4104;
-            border-color: #db4104;
+        .form-container input[type="number"] {
+            width: 60px;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            text-align: center;
         }
 
-        .text-orange {
-            color: #FE5A1D !important;
+        .form-container input[type="text"] {
+            width: 120px;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            text-align: center;
         }
-    /* Add a border between Total Hours and Regular Holiday OT */
 
-    </style>
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .spinner-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+    .input-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .spinner-label {
+        font-size: 16px;
+        color: var(--text-color);
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .styled-select {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 14px;
+        background-color: white;
+        cursor: pointer;
+        transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+    }
+
+    .styled-select:hover {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 8px rgba(245, 124, 0, 0.2);
+    }
+
+    .styled-select:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 12px rgba(245, 124, 0, 0.3);
+    }
+    
+
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+        min-height: auto;
+        overflow-x: hidden;
+    }
+
+    .dashboard {
+        width: 100%;
+        padding: 15px;
+        margin: 10px 0;
+        box-shadow: none;
+        border-radius: 0;
+    }
+
+    .header {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .logo {
+        margin-top: 15px;
+        width: 200px;
+    }
+
+    .employee-info {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .employee-info h4 {
+        margin-top: 10px;
+        font-size: 14px;
+    }
+
+    .spinner-container {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .input-group {
+        width: 100%;
+    }
+
+    .styled-select {
+        width: 100%;
+    }
+
+    /* Table adjustments */
+    .form-container {
+        overflow-x: auto;
+        padding: 0;
+        max-height: none;
+    }
+
+    table {
+        font-size: 12px;
+    }
+
+    table th, table td {
+        padding: 6px;
+    }
+
+    /* Form inputs */
+    .form-container input[type="number"],
+    .form-container input[type="text"] {
+        width: 80%;
+        padding: 4px;
+        font-size: 12px;
+    }
+
+    /* Button adjustments */
+    .customized-button-container {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .customized-btn {
+        width: 100%;
+        padding: 10px;
+        font-size: 14px;
+    }
+
+    /* Modal adjustments */
+    .modal-content {
+        width: 95%;
+        padding: 15px;
+    }
+
+    /* Hide some less important elements on mobile */
+    .employee-info h4 span {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Further adjustments for very small screens */
+    .dashboard {
+        padding: 10px;
+    }
+
+    table {
+        font-size: 11px;
+    }
+
+    table th, table td {
+        padding: 4px;
+    }
+
+    .form-container input[type="number"],
+    .form-container input[type="text"] {
+        width: 70%;
+        font-size: 11px;
+    }
+
+    /* Stack date range selectors */
+    .input-group span {
+        display: none;
+    }
+
+    #dayFrom, #dayTo {
+        width: 45%;
+        margin: 0 2%;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard {
+        width: 90%;
+        padding: 15px;
+        margin: 15px auto;
+        border-radius: 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard {
+        width: 95%;
+        padding: 12px;
+        margin: 10px auto;
+        border-radius: 6px;
+    }
+}
+</style>
 </head>
-<body id="page-top">
 
-    <!-- Page Wrapper -->
-    <div id="wrapper">
 
-<!-- Sidebar -->
-<ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
-    <style>
-        .sidebar {
-            background-color: #FE5A1D !important;
-            background-image: none !important;
-            padding-top: 5px;
+<body>
+
+ <!-- Back Button -->
+<div style="position: absolute; top: 15px; left: 15px; z-index: 1000;">
+  <button
+    style="background-color: white; text-align: center; width: 120px; border-radius: 10px; height: 36px; position: relative; color: black; font-size: 14px; font-weight: 600; border: none; cursor: pointer; overflow: hidden;"
+    type="button"
+    onclick="history.back();"
+  >
+    <div
+      style="background-color:  #FE5A1D; border-radius: 8px; height: 30px; width: 25%; display: flex; align-items: center; justify-content: center; position: absolute; left: 3px; top: 3px; z-index: 10; transition: width 0.5s;"
+      class="back-button-icon"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 1024 1024"
+        height="16px"
+        width="16px"
+      >
+        <path
+          d="M224 480h640a32 32 0 1 1 0 64H224a32 32 0 0 1 0-64z"
+          fill="#ffffff"
+        ></path>
+        <path
+          d="m237.248 512 265.408 265.344a32 32 0 0 1-45.312 45.312l-288-288a32 32 0 0 1 0-45.312l288-288a32 32 0 1 1 45.312 45.312L237.248 512z"
+          fill="#ffffff"
+        ></path>
+      </svg>
+    </div>
+    <p style="transform: translateX(5px); line-height: 36px; margin: 0;">Back</p>
+  </button>
+</div>
+
+
+    <div class="dashboard">
+        <div class="header">
+            <h1>Employee Time Record</h1>
+            <img src="img/ATSPH_Logo.png" alt="Company Logo" class="logo">
+        </div>
+        <div class="employee-info" style="display: flex; justify-content: space-between; align-items: center;">
+    <h1 style="color:rgb(231, 84, 16); margin-top: -15px;">
+        <?php echo htmlspecialchars($employee_name); ?>
+    </h1>
+    <h4 style="margin-top: -15px; opacity: 0.8;">
+    This record will automatically reset every<br>
+    <span style="color: rgb(231, 84, 16); display: inline-block; margin-top: 5px;">
+    1st and 16th day of the month
+    </span>
+</h4>
+</div>
+        
+        <div class="spinner-container">
+
+    <!-- Month Selection -->
+    <div class="input-group">
+        <label for="month" class="spinner-label"><i class="fas fa-calendar-alt"></i> Months:</label>
+        <select id="month" class="styled-select">
+            <option value="January">January</option>
+            <option value="February">February</option>
+            <option value="March">March</option>
+            <option value="April">April</option>
+            <option value="May">May</option>
+            <option value="June">June</option>
+            <option value="July">July</option>
+            <option value="August">August</option>
+            <option value="September">September</option>
+            <option value="October">October</option>
+            <option value="November">November</option>
+            <option value="December">December</option>
+        </select>
+    </div>
+
+    <!-- Day Selection -->
+    <div class="input-group">
+        <label for="dayFrom" class="spinner-label"><i class="fas fa-calendar-day"></i> Days:</label>
+        <select id="dayFrom" class="styled-select"></select>
+        <span>to</span>
+        <select id="dayTo" class="styled-select"></select>
+    </div>
+
+    <!-- Year Selection -->
+    <div class="input-group">
+        <label for="year" class="spinner-label"><i class="fas fa-calendar"></i> Years:</label>
+        <select id="year" class="styled-select"></select>
+    </div>
+
+    <!-- Shift Selection -->
+    <div class="input-group">
+        <label for="shift" class="spinner-label"><i class="fas fa-clock"></i> Shifts:</label>
+        <select id="shift" class="styled-select">
+            <option value="Shift 1">SHIFT 1 WORKING HOURS (Monday-Friday)</option>
+            <option value="Shift 2">SHIFT 2 WORKING HOURS (Monday-Thursday)</option>
+            <option value="Shift 3">SHIFT 3 WORKING HOURS (Wednesday-Saturday)</option>
+        </select>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // Get current date details
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.getMonth(); // 0 = Jan, 1 = Feb, etc.
+    const currentDay = currentDate.getDate();
+
+    // Auto-select current month
+    const monthSelect = document.getElementById("month");
+    if (monthSelect) {
+        monthSelect.selectedIndex = currentMonth;
+    }
+
+    // Populate years dynamically (from last year up to 2050)
+    const yearSelect = document.getElementById("year");
+    if (yearSelect) {
+        for (let year = currentYear - 1; year <= 2050; year++) {
+            let option = new Option(year, year);
+            if (year === currentYear) option.selected = true;
+            yearSelect.appendChild(option);
         }
-    </style>
-    <!-- Sidebar - Brand -->
-    <a class="sidebar-brand d-flex align-items-center justify-content-center" href="dashboard.php">
-        <div class="sidebar-brand-icon">
-            <i class="fas fa-users"></i>
-        </div>
-        <div class="sidebar-brand-text mx-3">Human Resource System</div>
-    </a>
+    }
 
-    <!-- Divider -->
-    <hr class="sidebar-divider my-0">
+    // Function to set day range while allowing full selection (1 to last day of the month)
+    function setDayRange() {
+        const dayFromSelect = document.getElementById("dayFrom");
+        const dayToSelect = document.getElementById("dayTo");
 
-    <!-- Nav Item - Dashboard -->
-    <li class="nav-item active">
-        <a class="nav-link" href="dashboard.php">
-            <i class="fas fa-fw fa-tachometer-alt"></i>
-            <span>Dashboard</span></a>
-    </li>
+        if (!dayFromSelect || !dayToSelect) return;
 
-    <!-- Divider -->
-    <hr class="sidebar-divider">
+        // Get last day of the current month
+        const lastDayOfMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
 
-    <!-- Heading -->
-    <div class="sidebar-heading">
-        Submissions
-    </div>
+        // Determine default start and end days
+        let defaultStartDay = currentDay <= 15 ? 1 : 16;
+        let defaultEndDay = currentDay <= 15 ? 15 : lastDayOfMonth;
 
-    <!-- Nav Item - Direct Link to DTR.php -->
-    <li class="nav-item">
-        <a class="nav-link text-white font-weight-bold" href="DTR.php" style="background-color: #db4104; border-radius: 5px;">
-            <i class="fas fa-fw fa-table text-white font-weight-bold"></i>
-            <span class="font-weight-bold">DTR Submission</span>
-        </a>
-    </li>
+        // Clear existing options
+        dayFromSelect.innerHTML = "";
+        dayToSelect.innerHTML = "";
 
-    <!-- Nav Item - Bill -->
-    <li class="nav-item">
-        <a class="nav-link " href="Bills.php">
-            <i class="fas fa-file-invoice-dollar"></i>
-            <span>Bill Submission</span>
-        </a>
-    </li>
+        // Populate "from" and "to" day dropdowns
+        for (let day = 1; day <= lastDayOfMonth; day++) {
+            let fromOption = new Option(day, day);
+            let toOption = new Option(day, day);
+            if (day === defaultStartDay) fromOption.selected = true;
+            if (day === defaultEndDay) toOption.selected = true;
+            dayFromSelect.appendChild(fromOption);
+            dayToSelect.appendChild(toOption);
+        }
+    }
 
-    <!-- Divider -->
-    <hr class="sidebar-divider">
+    // Set initial day range
+    setDayRange();
+});
+</script>
 
-    <!-- Heading -->
-    <div class="sidebar-heading">
-        Monitoring
-    </div>
 
-    <!-- Nav Item - Leave -->
-    <li class="nav-item">
-        <a class="nav-link" href="Leave.php">
-            <i class="fas fa-fw fa-chart-area"></i>
-            <span>Leave Monitoring</span></a>
-    </li>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const submitButton = document.getElementById("submitButton");
+    const confirmSubmitButton = document.getElementById("confirmSubmit");
+    const cancelSubmitButton = document.getElementById("cancelSubmit");
+    const confirmationModal = document.getElementById("confirmationModal");
+    const successModal = document.getElementById("successModal");
+    const dtrForm = document.getElementById("dtrForm");
 
-    <!-- Divider -->
-    <hr class="sidebar-divider">
+    function showModal(modal) {
+        modal.style.display = "block";
+    }
 
-    <!-- Heading -->
-    <div class="sidebar-heading">
-        Management
-    </div>
+    function hideModal(modal) {
+        modal.style.display = "none";
+    }
 
-    <!-- Nav Item - Employee management -->
-    <li class="nav-item">
-        <a class="nav-link" href="EmployeeManagement.php">
-            <i class="fas fa-users-cog"></i>
-            <span>Employee Management</span>
-        </a>
-    </li>
+    submitButton.addEventListener("click", function (event) {
+        event.preventDefault();
+        showModal(confirmationModal);
+    });
 
-    <!-- Sidebar Toggler (Sidebar) -->
-    <div class="text-center d-none d-md-inline">
-        <button class="rounded-circle border-0" id="sidebarToggle"></button>
-    </div>
-</ul>
-<!-- End of Sidebar -->
+    cancelSubmitButton.addEventListener("click", function () {
+        hideModal(confirmationModal);
+    });
 
-<!-- Content Wrapper -->
-<div id="content-wrapper" class="d-flex flex-column">
+    confirmSubmitButton.addEventListener("click", function () {
+        hideModal(confirmationModal);
 
-    <!-- Main Content -->
-    <div id="content">
+        // Populate hidden inputs before sending data
+        document.getElementById("yearHidden").value = document.getElementById("year").value;
+        document.getElementById("monthHidden").value = document.getElementById("month").value;
+        document.getElementById("dayFromHidden").value = document.getElementById("dayFrom").value;
+        document.getElementById("dayToHidden").value = document.getElementById("dayTo").value;
+        document.getElementById("shiftHidden").value = document.getElementById("shift").value;
 
-        <!-- Topbar -->
-        <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+        const formData = new FormData(dtrForm);
 
-            <!-- Sidebar Toggle (Topbar) -->
-            <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
-                <i class="fa fa-bars"></i>
-            </button>
+        fetch("CRUD/submit_dtr.php", {
+            method: "POST",
+            body: formData,
+            headers: {
+                "Accept": "application/json"
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === "success") {
+                showModal(successModal); // Show success modal on success
+            } else {
+                alert("Error: " + data.message);
+            }
+        })
+        .catch(error => console.error("Error:", error));
+    });
 
-            <div class="logo">
-                <img src="img/ATS_Logo.png" alt="Logo" width="250" height="50">
-            </div>
+});
 
-            <!-- Topbar Navbar -->
-            <ul class="navbar-nav ml-auto">
+</script>
 
-                <!-- Nav Item - User Information -->
-                <li class="nav-item dropdown no-arrow">
-                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <span class="mr-2 d-none d-lg-inline text-gray-600 small">Admin Manager</span>
-                        <img class="img-profile rounded-circle" src="img/undraw_profile.svg">
-                    </a>
-                    <!-- Dropdown - User Information -->
-                    <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
-                        <a class="dropdown-item" href="#" data-toggle="modal" data-target="#manageAccountModal">
-                            <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
-                            Manage Account
-                        </a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
-                            <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
-                            Logout
-                        </a>
-                    </div>
-                </li>
-            </ul>
-        </nav>
-        <!-- End of Topbar -->
 
-        <!-- Begin Page Content -->
-        <div class="container-fluid">
+<form id="dtrForm" method="POST">
+    <div class="form-container">
+        <table id="mainTable">
+            <thead>
+                <tr>
+                    <th rowspan="2">Employee No.</th>
+                    <th rowspan="2">Employee Name</th>
+                    <th rowspan="2">General</th>
+                    <th rowspan="2">Admin</th>
+                    <th rowspan="2">Finance</th>
+                    <th rowspan="2">Design</th>
+                    <th colspan="6">Operations/Customer Service</th>
+                    <th rowspan="2">Warranty</th>
+                    <th rowspan="2">Billable Service</th>
+                    <th rowspan="2">Upgrade</th>
+                    <th rowspan="2">Pre-Sales Support</th>
+                    <th rowspan="2">Special Project</th>
+                    <th rowspan="2" style="color: yellow" >Total Hours</th>
+                </tr>
+                <tr>
+                    <th>Board Repair</th>
+                    <th>PM</th>
+                    <th>Technical Support</th>
+                    <th>Maintenance Support</th>
+                    <th>Logistics & Comm.</th>
+                    <th>CDT/Reports/Meetings</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="background-color:rgba(82, 82, 82, 0.3)"><input type="text" name="employeeNo"  value="<?php echo htmlspecialchars($employee_no); ?>" readonly></td>
+                    <td style="background-color:rgba(82, 82, 82, 0.3)"><input type="text" name="employeeName" value="<?php echo htmlspecialchars($employee_name); ?>" readonly></td>
+                    
+                    <td><input type="number" name="general" class="hourInput"></td>
+                    <td><input type="number" name="admin" class="hourInput"></td>
+                    <td><input type="number" name="finance" class="hourInput"></td>
+                    <td><input type="number" name="design" class="hourInput"></td>
+                    <td><input type="number" name="boardRepair" class="hourInput"></td>
+                    <td><input type="number" name="pm" class="hourInput"></td>
 
-            <!-- Page Heading -->
-            <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                <h1 class="h3 mb-0 text-gray-800">DTR Submissions</h1>
-                <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-download fa-sm text-white-50"></i> Generate Report</a>
-            </div>
+                    <td><input type="number" name="technicalSupport" class="hourInput"></td>
+                    <td><input type="number" name="maintenance" class="hourInput"></td>
+                    <td><input type="number" name="logistics" class="hourInput"></td>
+                    <td><input type="number" name="reports" class="hourInput"></td>
 
-        <!-- Main Content -->
-        <div id="content">
-            <!-- DTR Table -->
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-orange">DTR Submission</h6>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                    <table class="table table-bordered" id="dtrTable" width="100%" cellspacing="0">
-    <thead>
-        <tr>
-            <th>No.</th>
-            <th>Employee No.</th>
-            <th>Employee Name</th>
-            <th>Category</th>
-            <th>General</th>
-            <th>Admin</th>
-            <th>Finance</th>
-            <th>Design</th>
-            <th>Board Repair</th>
-            <th>PM</th>
-            <th>Technical Support</th>
-            <th>Maintenance Support</th>
-            <th>Logistics & Comm.</th>
-            <th>CDT/Reports/Meetings</th>
-            <th>Warranty</th>
-            <th>Billable Service</th>
-            <th>Upgrade</th>
-            <th>Pre-Sales Support</th>
-            <th>Special Project</th>
-            <th>Total Hours</th>
-            
-            <th>Regular Holiday OT</th>
-            <th>Special Holiday OT</th>
-            <th>Regular OT</th>
-            <th>Night Diff OT</th>
-            <th>Salary Deduction</th>
-            <th>Leave Conversion</th>
-            <th>Leave Balances</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody id="dtrTableBody">
-        <!-- Example row with edit button -->
-        <tr>
-            <td>1</td>
-            <td contenteditable="false">A001</td>
-            <td contenteditable="false">Daominsy Yabut</td>
-            <td contenteditable="false">Hours</td>
-            <td contenteditable="false">8</td>
-            <td contenteditable="false">0</td>
-            <td contenteditable="false">0</td>
-            <td contenteditable="false">4</td>
-            <td contenteditable="false">0</td>
-            <td contenteditable="false">0</td>
-            <td contenteditable="false">0</td>
-            <td contenteditable="false">0</td>
-            <td contenteditable="false">0</td>
-            <td contenteditable="false">0</td>
-            <td contenteditable="false">0</td>
-            <td contenteditable="false">0</td>
-            <td contenteditable="false">0</td>
-            <td contenteditable="false">0</td>
-            <td contenteditable="false">0</td>
-            <td contenteditable="false">8</td>
-            <td contenteditable="false">0</td>
-            <td contenteditable="false">0</td>
-            <td contenteditable="false">0</td>
-            <td contenteditable="false">0</td>
-            <td contenteditable="false">0</td>
-            <td contenteditable="false">0</td>
-            <td contenteditable="false">0</td>
-            <td>
-                <button class="btn btn-success btn-sm edit-btn">
-                    <i class="fas fa-edit"></i> Edit
-                </button>
-            </td>
-        </tr>
-        <tr>
-            <td>2</td>
-            <td contenteditable="false">A003</td>
-            <td contenteditable="false">Rovic Balatbat</td>
-            <td contenteditable="false">Hours</td>
-            <td contenteditable="false">44</td>
-            <td contenteditable="false">0</td>
-            <td contenteditable="false">0</td>
-            <td contenteditable="false">4</td>
-            <td contenteditable="false">0</td>
-            <td contenteditable="false">22</td>
-            <td contenteditable="false">0</td>
-            <td contenteditable="false">0</td>
-            <td contenteditable="false">0</td>
-            <td contenteditable="false">0</td>
-            <td contenteditable="false">0</td>
-            <td contenteditable="false">0</td>
-            <td contenteditable="false">0</td>
-            <td contenteditable="false">0</td>
-            <td contenteditable="false">0</td>
-            <td contenteditable="false">8</td>
-            <td contenteditable="false">0</td>
-            <td contenteditable="false">0</td>
-            <td contenteditable="false">0</td>
-            <td contenteditable="false">0</td>
-            <td contenteditable="false">0</td>
-            <td contenteditable="false">0</td>
-            <td contenteditable="false">0</td>
-            <td>
-                <button class="btn btn-success btn-sm edit-btn">
-                    <i class="fas fa-edit"></i> Edit
-                </button>
-            </td>
-        </tr>
-    </tbody>
-</table>
-                    </div>
-                    <div class="text-right mt-3">
-                        <strong id="submissionCount">2 employees have submitted</strong>
-                    </div>
-                </div>
-            </div>
-            <div class="card shadow mb-4">
-                        <div class="card-header py-3">
-                        <h6 class="m-0 font-weight-bold text-orange">DTR Submission</h6>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-bordered" id="dtrTable2" width="100%" cellspacing="0">
-                                    <thead>
-                                        <tr>
-                                            <th>Employee No.</th>
-                                            <th>Employee Name</th>
-                                            <th>Status</th>
-                                            <th>Submission Date</th>
-                                            <th>Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>EMP001</td>
-                                            <td>Tiger Nixon</td>
-                                            <td class="text-success font-weight-bold">Submitted</td>
-                                            <td>2024/02/15 08:30 AM</td>
-                                            <td><button class="btn btn-primary btn-sm view-btn">View</button></td>
-                                        </tr>
-                                        <tr>
-                                            <td>EMP002</td>
-                                            <td>Garrett Winters</td>
-                                            <td class="text-success font-weight-bold">Submitted</td>
-                                            <td>2024/02/16 01:45 PM</td>
-                                            <td><button class="btn btn-primary btn-sm view-btn">View</button></td>
-                                        </tr>
-                                        <tr>
-                                            <td>EMP003</td>
-                                            <td>Ashton Cox</td>
-                                            <td class="text-success font-weight-bold">Submitted</td>
-                                            <td>2024/02/17 10:15 AM</td>
-                                            <td><button class="btn btn-primary btn-sm view-btn">View</button></td>
-                                        </tr>
-                                        <tr>
-                                            <td>EMP004</td>
-                                            <td>Cedric Kelly</td>
-                                            <td class="text-success font-weight-bold">Submitted</td>
-                                            <td>2024/02/18 04:20 PM</td>
-                                            <td><button class="btn btn-primary btn-sm view-btn">View</button></td>
-                                        </tr>
-                                        <tr>
-                                            <td>EMP005</td>
-                                            <td>Airi Satou</td>
-                                            <td class="text-success font-weight-bold">Submitted</td>
-                                            <td>2024/02/19 09:05 AM</td>
-                                            <td><button class="btn btn-primary btn-sm view-btn">View</button></td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div class="text-right mt-3">
-                                <strong id="submissionCount2">5/14 employees have submitted</strong>
-                            </div>
-                        </div>
-                    </div>
+                    <td><input type="number" name="warranty" class="hourInput"></td>
+                    <td><input type="number" name="billableService" class="hourInput"></td>
+                    <td><input type="number" name="upgrade" class="hourInput"></td>
+                    <td><input type="number" name="preSales" class="hourInput"></td>
+                    <td><input type="number" name="specialProject" class="hourInput"></td>
 
-                </div>
-                <!-- End of Main Content -->
+                    <td style="background-color:rgba(82, 82, 82, 0.3)"><input type="number" id="totalHours" name="totalHours" readonly></td>
+                </tr>
+            </tbody>
+        </table>
 
-                <!-- Footer -->
-                <footer class="sticky-footer bg-white">
-                    <div class="container my-auto">
-                        <div class="copyright text-center my-auto">
-                            <span>Copyright &copy; AEHR Test Systems 2025</span>
-                        </div>
-                    </div>
-                </footer>
-                <!-- End of Footer -->
-
-            </div>
-            <!-- End of Content Wrapper -->
-
-        </div>
-        <!-- End of Page Wrapper -->
-
-        <!-- Scroll to Top Button-->
-        <a class="scroll-to-top rounded" href="#page-top">
-            <i class="fas fa-angle-up"></i>
-        </a>
-
-        <!-- Logout Modal-->
-        <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
-                        <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">×</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
-                    <div class="modal-footer">
-                        <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                        <a class="btn btn-primary" href="index.php">Logout</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- Manage Account Modal -->
-        <div class="modal fade" id="manageAccountModal" tabindex="-1" role="dialog" aria-labelledby="manageAccountModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="manageAccountModalLabel">Manage Account</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="manageAccountForm">
-                            <div class="form-group">
-                                <label for="adminUsername">New Username</label>
-                                <input type="text" class="form-control" id="adminUsername" name="adminUsername" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="adminPassword">New Password</label>
-                                <input type="password" class="form-control" id="adminPassword" name="adminPassword" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="confirmPassword">Confirm Password</label>
-                                <input type="password" class="form-control" id="confirmPassword" required>
-                            </div>
-                            <div id="passwordError" class="text-danger" style="display: none;">Passwords do not match!</div>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-primary" onclick="updateAdminAccount()">Save Changes</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Confirmation Modal -->
-        <div class="modal fade" id="confirmationModal" tabindex="-1" role="dialog" aria-labelledby="confirmationModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="confirmationModalLabel">Success</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        Your account has been successfully updated.
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="location.reload();">OK</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- View Data Modal -->
-        <div class="modal fade" id="viewDataModal" tabindex="-1" role="dialog" aria-labelledby="viewDataModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-xl" role="document"> <!-- Changed to modal-xl for extra large size -->
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="viewDataModalLabel">Employee Details</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="table-responsive"> <!-- Added for horizontal scrolling -->
-                            <table class="table table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th>Employee No.</th>
-                                        <th>Employee Name</th>
-                                        <th>Category</th>
-                                        <th>General</th>
-                                        <th>Admin</th>
-                                        <th>Finance</th>
-                                        <th>Design</th>
-                                        <th>Board Repair</th>
-                                        <th>PM</th>
-                                        <th>Technical Support</th>
-                                        <th>Maintenance Support</th>
-                                        <th>Logistics & Comm.</th>
-                                        <th>CDT/Reports/Meetings</th>
-                                        <th>Warranty</th>
-                                        <th>Billable Service</th>
-                                        <th>Upgrade</th>
-                                        <th>Pre-Sales Support</th>
-                                        <th>Special Project</th>
-                                        <th>Total Hours</th>
-                                        <th>Regular Holiday OT</th>
-                                        <th>Special Holiday OT</th>
-                                        <th>Regular OT</th>
-                                        <th>Night Diff OT</th>
-                                        <th>Salary Deduction</th>
-                                        <th>Leave Conversion</th>
-                                        <th>Leave Balances</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td id="viewEmpNo"></td>
-                                        <td id="viewEmpName"></td>
-                                        <td id="viewCategory"></td>
-                                        <td id="viewGeneral"></td>
-                                        <td id="viewAdmin"></td>
-                                        <td id="viewFinance"></td>
-                                        <td id="viewDesign"></td>
-                                        <td id="viewBoardRepair"></td>
-                                        <td id="viewPM"></td>
-                                        <td id="viewTechnicalSupport"></td>
-                                        <td id="viewMaintenanceSupport"></td>
-                                        <td id="viewLogisticsComm"></td>
-                                        <td id="viewCDTReportsMeetings"></td>
-                                        <td id="viewWarranty"></td>
-                                        <td id="viewBillableService"></td>
-                                        <td id="viewUpgrade"></td>
-                                        <td id="viewPreSalesSupport"></td>
-                                        <td id="viewSpecialProject"></td>
-                                        <td id="viewTotalHours"></td>
-                                        <td id="viewRegularHolidayOT"></td>
-                                        <td id="viewSpecialHolidayOT"></td>
-                                        <td id="viewRegularOT"></td>
-                                        <td id="viewNightDiffOT"></td>
-                                        <td id="viewSalaryDeduction"></td>
-                                        <td id="viewLeaveConversion"></td>
-                                        <td id="viewLeaveBalances"></td>
-                                        <td id="viewStatus"></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Success Modal -->
-        <div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="successModalLabel">Success</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        Successfully edited field.
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Bootstrap core JavaScript-->
-        <script src="vendor/jquery/jquery.min.js"></script>
-        <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-
-        <!-- Core plugin JavaScript-->
-        <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
-
-        <!-- Custom scripts for all pages-->
-        <script src="js/sb-admin-2.min.js"></script>
-
-        <!-- DataTables JavaScript -->
-        <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
-        <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap4.min.js"></script>
-
-        <!-- Custom JavaScript for Edit/Save functionality -->
         <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                const editButtons = document.querySelectorAll('.edit-btn');
-
-                editButtons.forEach(button => {
-                    button.addEventListener('click', function () {
-                        const row = this.closest('tr');
-                        const cells = row.querySelectorAll('td');
-                        const isEditing = row.getAttribute('data-editing') === 'true';
-
-                        if (isEditing) {
-                            // Save logic
-                            let hasChanges = false;
-                            cells.forEach(cell => {
-                                if (cell.getAttribute('contenteditable') === 'true') {
-                                    cell.setAttribute('contenteditable', 'false');
-                                    if (cell.textContent !== cell.getAttribute('data-original')) {
-                                        hasChanges = true;
-                                    }
-                                }
-                            });
-
-                            if (hasChanges) {
-                                // Show success modal
-                                $('#successModal').modal('show');
-                            }
-
-                            // Change button back to Edit
-                            this.innerHTML = '<i class="fas fa-edit"></i> Edit';
-                            this.classList.remove('btn-warning');
-                            this.classList.add('btn-success');
-                            row.setAttribute('data-editing', 'false');
-                        } else {
-                            // Edit logic
-                            cells.forEach(cell => {
-                                if (cell !== cells[cells.length - 1] && cell !== cells[cells.length - 2]) {
-                                    cell.setAttribute('contenteditable', 'true');
-                                    cell.setAttribute('data-original', cell.textContent);
-                                }
-                            });
-
-                            // Change button to Save
-                            this.innerHTML = '<i class="fas fa-save"></i> Save';
-                            this.classList.remove('btn-success');
-                            this.classList.add('btn-warning');
-                            row.setAttribute('data-editing', 'true');
-                        }
-                    });
-                });
-            });
-
-            // Function to handle "View" button click
-            document.addEventListener("DOMContentLoaded", function () {
-                const viewButtons = document.querySelectorAll('.view-btn');
-                viewButtons.forEach(button => {
-                    button.addEventListener('click', function () {
-                        // Get the row data
-                        const row = this.closest('tr');
-                        const empNo = row.cells[0].textContent;
-                        const empName = row.cells[1].textContent;
-                        const status = row.cells[2].textContent;
-                        const submissionDate = row.cells[3].textContent;
-
-                        // Fetch additional data (replace with actual data fetching logic)
-                        const additionalData = {
-                            Category: "Category Data",
-                            General: "General Data",
-                            Admin: "Admin Data",
-                            Finance: "Finance Data",
-                            Design: "Design Data",
-                            BoardRepair: "Board Repair Data",
-                            PM: "PM Data",
-                            TechnicalSupport: "Technical Support Data",
-                            MaintenanceSupport: "Maintenance Support Data",
-                            LogisticsComm: "Logistics & Comm. Data",
-                            CDTReportsMeetings: "CDT/Reports/Meetings Data",
-                            Warranty: "Warranty Data",
-                            BillableService: "Billable Service Data",
-                            Upgrade: "Upgrade Data",
-                            PreSalesSupport: "Pre-Sales Support Data",
-                            SpecialProject: "Special Project Data",
-                            TotalHours: "Total Hours Data",
-                            RegularHolidayOT: "Regular Holiday OT Data",
-                            SpecialHolidayOT: "Special Holiday OT Data",
-                            RegularOT: "Regular OT Data",
-                            NightDiffOT: "Night Diff OT Data",
-                            SalaryDeduction: "Salary Deduction Data",
-                            LeaveConversion: "Leave Conversion Data",
-                            LeaveBalances: "Leave Balances Data"
-                        };
-
-                        // Populate the modal with the data
-                        document.getElementById('viewEmpNo').textContent = empNo;
-                        document.getElementById('viewEmpName').textContent = empName;
-                        document.getElementById('viewCategory').textContent = additionalData.Category;
-                        document.getElementById('viewGeneral').textContent = additionalData.General;
-                        document.getElementById('viewAdmin').textContent = additionalData.Admin;
-                        document.getElementById('viewFinance').textContent = additionalData.Finance;
-                        document.getElementById('viewDesign').textContent = additionalData.Design;
-                        document.getElementById('viewBoardRepair').textContent = additionalData.BoardRepair;
-                        document.getElementById('viewPM').textContent = additionalData.PM;
-                        document.getElementById('viewTechnicalSupport').textContent = additionalData.TechnicalSupport;
-                        document.getElementById('viewMaintenanceSupport').textContent = additionalData.MaintenanceSupport;
-                        document.getElementById('viewLogisticsComm').textContent = additionalData.LogisticsComm;
-                        document.getElementById('viewCDTReportsMeetings').textContent = additionalData.CDTReportsMeetings;
-                        document.getElementById('viewWarranty').textContent = additionalData.Warranty;
-                        document.getElementById('viewBillableService').textContent = additionalData.BillableService;
-                        document.getElementById('viewUpgrade').textContent = additionalData.Upgrade;
-                        document.getElementById('viewPreSalesSupport').textContent = additionalData.PreSalesSupport;
-                        document.getElementById('viewSpecialProject').textContent = additionalData.SpecialProject;
-                        document.getElementById('viewTotalHours').textContent = additionalData.TotalHours;
-                        document.getElementById('viewRegularHolidayOT').textContent = additionalData.RegularHolidayOT;
-                        document.getElementById('viewSpecialHolidayOT').textContent = additionalData.SpecialHolidayOT;
-                        document.getElementById('viewRegularOT').textContent = additionalData.RegularOT;
-                        document.getElementById('viewNightDiffOT').textContent = additionalData.NightDiffOT;
-                        document.getElementById('viewSalaryDeduction').textContent = additionalData.SalaryDeduction;
-                        document.getElementById('viewLeaveConversion').textContent = additionalData.LeaveConversion;
-                        document.getElementById('viewLeaveBalances').textContent = additionalData.LeaveBalances;
-                        document.getElementById('viewStatus').textContent = status;
-
-                        // Show the modal
-                        $('#viewDataModal').modal('show');
-                    });
-                });
-            });
-
-            $(document).ready(function() {
-        // Initialize DataTables for the first table
-        $('#dtrTable').DataTable({
-            "paging": false,
-            "searching": true,
-            "ordering": true,
-            "info": true,
-            "lengthChange": true,
-            "pageLength": 10,
-            "dom": 'lftip'
+document.addEventListener("DOMContentLoaded", function () {
+    function calculateTotalHours() {
+        let total = 0;
+        document.querySelectorAll("#mainTable .hourInput").forEach(input => {
+            const value = parseFloat(input.value) || 0;
+            total += value;
         });
+        document.getElementById("totalHours").value = total;
+    }
 
-        // Initialize DataTables for the second table
-        $('#dtrTable2').DataTable({
-            "paging": false,
-            "searching": true,
-            "ordering": true,
-            "info": true,
-            "lengthChange": true,
-            "pageLength": 10,
-            "dom": 'lftip'
+    document.querySelectorAll("#mainTable .hourInput").forEach(input => {
+        input.addEventListener("input", calculateTotalHours);
+    });
+    
+    calculateTotalHours();
+});
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    let inputs = document.querySelectorAll(".hourInput"); // Select all input fields
+
+    inputs.forEach((input, index) => {
+        input.addEventListener("keypress", function (event) {
+            if (event.key === "Enter") { 
+                event.preventDefault(); // Prevent form submission
+
+                let nextInput = inputs[index + 1]; // Get the next input field
+                if (nextInput) {
+                    nextInput.focus(); // Move focus to the next input
+                }
+            }
         });
     });
-        </script>
+});
+
+</script>
+
+        <table>
+        <thead>
+    <tr>
+        <th rowspan="2">Weekend Support <span style="color: yellow">(Days)</span></th>
+        <th rowspan="2">Regular Holiday Overtime <span style="color: yellow">(Hours)</span></th>
+        <th rowspan="2">Special Holiday Overtime <span style="color: yellow">(Hours)</span></th>
+        <th rowspan="2">Regular Overtime <span style="color: yellow">(Hours)</span></th>
+        <th rowspan="2">Night Differential <span style="color: yellow">(Hours)</span></th>
+        <th rowspan="2">Salary Deduction <span style="color: yellow">(Hours)</span></th>
+        <th colspan="2">LEAVE CONVERSION</th>
+    </tr>
+    <tr>
+        <th>VL <span style="color: yellow">(Hours)</span></th>
+        <th>SL <span style="color: yellow">(Hours)</span></th>
+    </tr>
+</thead>
+
+            <tbody>
+                <tr>
+                    <td><input type="number" name="weekendSupport" class="hourInput2"></td>
+                    <td><input type="number" name="regularHolidayOvertime" class="hourInput2"></td>
+                    <td><input type="number" name="specialHolidayOvertime" class="hourInput2"></td>
+                    <td><input type="number" name="regularOvertime" class="hourInput2"></td>
+                    <td><input type="number" name="nightDifferential" class="hourInput2"></td>
+                    <td><input type="number" name="salaryDeduction" class="hourInput2"></td>
+                    <td><input type="number" name="vlHours" class="hourInput2"></td>
+                    <td><input type="number" name="slHours" class="hourInput2"></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <script>
+document.addEventListener("DOMContentLoaded", function () {
+    // Select all inputs with class "hourInput2"
+    const inputs = document.querySelectorAll(".hourInput2");
+
+    inputs.forEach((input, index) => {
+        input.addEventListener("keydown", function (event) {
+            if (event.key === "Enter") {
+                event.preventDefault(); // Prevent form submission
+
+                const nextInput = inputs[index + 1]; // Get the next input
+                if (nextInput) {
+                    nextInput.focus(); // Move focus to the next field
+                }
+            }
+        });
+    });
+});
+</script>
+
+
+        <input type="hidden" name="year" id="yearHidden">
+        <input type="hidden" name="month" id="monthHidden">
+        <input type="hidden" name="dayFrom" id="dayFromHidden">
+        <input type="hidden" name="dayTo" id="dayToHidden">
+        <input type="hidden" name="shift" id="shiftHidden">
+    </div>
+
+
+
+    <div class="customized-button-container">
+
+    <!-- Submit Button -->
+    <button type="button" class="customized-btn" id="submitButton">
+    <i class="fas fa-check"></i> Submit
+</button>
+
+   
+</div>  
+    </div>
+</form>
+
+
+
+
+<!-- Updated Modal HTML -->
+<!-- Confirmation Modal -->
+<div id="confirmationModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); justify-content: center; align-items: center; z-index: 1000;">
+    <div class="modal-content" style="background: white; padding: 20px; border-radius: 8px; width: 90%; max-width: 400px; box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3); text-align: center; position: relative;">
+        <button class="modal-close" style="position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 20px; cursor: pointer;">&times;</button>
+        <h2 style="margin: 0 0 20px 0;">Confirm Submission</h2>
+        <p>Are you sure you want to submit this information?</p>
+        <div style="display: flex; gap: 10px; justify-content: center; margin-top: 25px;">
+            <button id="confirmSubmit" class="btn">Submit</button>
+            <button id="cancelSubmit" class="btn cancel-btn">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div id="successModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 1000;">
+    <div class="modal-content" style="background: white; padding: 20px; border-radius: 8px; width: 90%; max-width: 400px; box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3); text-align: center; position: relative; margin: auto;">
+        <div style="text-align: center;">
+            <div style="font-size: 50px; color: #4CAF50; margin-bottom: 15px;">✓</div>
+            <h3 style="margin: 0 0 15px 0;">Success!</h3>
+            <p style="margin-bottom: 25px;">Record submitted successfully!</p>
+            <div style="display: flex; justify-content: center;">
+                <button id="closeSuccessModal" class="btn">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const modals = {
+        confirm: document.getElementById('confirmationModal'),
+        success: document.getElementById('successModal')
+    };
+
+    function hideModals() {
+        Object.values(modals).forEach(modal => {
+            modal.style.display = "none";
+            document.body.style.overflow = 'auto';
+        });
+    }
+
+    function showModal(modal) {
+        hideModals();
+        if (modals[modal]) {
+            modals[modal].style.display = "flex";
+            modals[modal].style.justifyContent = "center"; // Ensure centering
+            modals[modal].style.alignItems = "center"; // Ensure centering
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    document.getElementById('submitButton')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        showModal('confirm');
+    });
+
+    document.getElementById('confirmSubmit')?.addEventListener('click', () => {
+        hideModals();
+        showModal('success');
+    });
+
+    window.addEventListener('click', (e) => {
+        if (e.target.classList.contains('modal')) hideModals();
+    });
+
+    document.getElementById('cancelSubmit')?.addEventListener('click', hideModals);
+    
+    document.getElementById('closeSuccessModal')?.addEventListener('click', function () {
+    hideModals();
+    location.reload(); // Refresh the page
+});
+
+});
+</script>
+
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const submitButton = document.getElementById("submitButton");
+    let isEditMode = false;
+
+    function calculateTotalHours() {
+        let total = 0;
+        document.querySelectorAll(".hourInput").forEach(input => {
+            total += parseFloat(input.value) || 0;
+        });
+        document.getElementById("totalHours").value = total;
+    }
+
+    function checkExistingData() {
+        const formData = new FormData();
+        formData.append('month', document.getElementById('month').value);
+        formData.append('dayFrom', document.getElementById('dayFrom').value);
+        formData.append('dayTo', document.getElementById('dayTo').value);
+        formData.append('year', document.getElementById('year').value);
+        formData.append('shift', document.getElementById('shift').value);
+        formData.append('employee_no', '<?php echo $employee_no; ?>');
+
+        fetch('CRUD/fetch_dtr.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                submitButton.innerHTML = '<i class="fas fa-sync"></i> Resubmit';
+                submitButton.classList.add('resubmit-btn');
+                isEditMode = true;
+
+                const fieldMap = {
+                    general_field: 'general',
+                    admin_field: 'admin',
+                    finance_field: 'finance',
+                    design_field: 'design',
+                    board_repair: 'boardRepair',
+                    pm: 'pm',
+                    tech_support: 'technicalSupport',
+                    maint_suport: 'maintenance',
+                    log_comm: 'logistics',
+                    report_meeting: 'reports',
+                    warranty: 'warranty',
+                    bill_service: 'billableService',
+                    upgrades: 'upgrade',
+                    presales_supp: 'preSales',
+                    special_proj: 'specialProject',
+                    weekends_supp: 'weekendSupport',
+                    regholiday_ot: 'regularHolidayOvertime',
+                    specholiday_ot: 'specialHolidayOvertime',
+                    reg_ot: 'regularOvertime',
+                    night_diff: 'nightDifferential',
+                    salary_deduc: 'salaryDeduction',
+                    vl: 'vlHours',
+                    sl: 'slHours'
+                };
+
+                Object.entries(fieldMap).forEach(([dbField, formField]) => {
+                    const input = document.querySelector(`[name="${formField}"]`);
+                    if (input && data.data[dbField]) {
+                        input.value = data.data[dbField];
+                    }
+                });
+
+                calculateTotalHours();
+            } else {
+                submitButton.innerHTML = '<i class="fas fa-check"></i> Submit';
+                submitButton.classList.remove('resubmit-btn');
+                isEditMode = false;
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    // Event listeners
+    ['month', 'dayFrom', 'dayTo', 'year', 'shift'].forEach(id => {
+        document.getElementById(id).addEventListener('change', checkExistingData);
+    });
+
+    document.querySelectorAll('.hourInput').forEach(input => {
+        input.addEventListener('input', calculateTotalHours);
+    });
+
+    // Initial check
+    checkExistingData();
+});
+</script>
+
+
+
+
+
+        </div>
+
+        <script>
+// Prevent logout when navigating or refreshing
+sessionStorage.setItem("activeSession", "true");
+
+// Log out only when all tabs are closed
+window.addEventListener("unload", function() {
+    sessionStorage.removeItem("activeSession");
+    setTimeout(() => {
+        if (!sessionStorage.getItem("activeSession")) {
+            fetch("logout.php", { method: "POST", keepalive: true });
+        }
+    }, 500);
+});
+</script>
+
+
     </body>
 </html>
-        

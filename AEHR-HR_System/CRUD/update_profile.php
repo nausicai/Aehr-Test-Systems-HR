@@ -1,4 +1,5 @@
 <?php
+session_name('HR_EMP_SESSION');
 session_start();
 require 'db.php';
 

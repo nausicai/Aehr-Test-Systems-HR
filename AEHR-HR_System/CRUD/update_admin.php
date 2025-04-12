@@ -1,4 +1,5 @@
 <?php
+session_name("admin_session"); // Set the session name for admin
 session_start();
 include 'db.php'; // Include database connection
 

@@ -1,0 +1,7 @@
+{
+    "require": {
+        "phpoffice/phpspreadsheet": "^2.1",
+        "smalot/pdfparser": "^2.11",
+        "google/cloud-vision": "^2.0"
+    }
+}

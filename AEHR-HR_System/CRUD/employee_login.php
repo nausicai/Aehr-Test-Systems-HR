@@ -1,4 +1,6 @@
 <?php
+session_name('HR_EMP_SESSION');
+
 session_start();
 include "db.php"; // Database connection
 
